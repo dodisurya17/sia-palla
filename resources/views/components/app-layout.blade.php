@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>{{ $title ?? 'Dashboard' }} - Sistem Informasi Akademik</title>
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+
+    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         [x-cloak] {
             display: none !important;
@@ -14,19 +22,29 @@
     </style>
 </head>
 
-<body class="font-sans antialiased text-gray-800">
+<body class="font-sans text-slate-900 antialiased bg-gray-200">
 
-    {{-- Background image dengan opacity terpisah --}}
-    <div class="fixed inset-0 bg-cover bg-center -z-10"
-        style="background-image: url('{{ asset('build/assets/bg-dashboard.jpg') }}'); opacity: 0.6;"></div>
-    <div class="fixed inset-0 bg-black/40 -z-10"></div>
+    <div class="flex min-h-screen" x-data="{ sidebarOpen: false }">
 
-    <div class="flex min-h-screen">
+        {{-- Backdrop (mobile only) --}}
+        <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+            class="fixed inset-0 z-30 bg-slate-900/40 lg:hidden"></div>
 
-        <aside class="w-64 bg-white text-slate-700 flex flex-col border-r border-gray-200">
-            <div class="h-24 flex items-center justify-center border-b border-gray-200">
-                <img src="{{ asset('build/assets/logo.jpg') }}" alt="Logo"
-                    class="w-14 h-14 object-cover">
+        {{-- Sidebar --}}
+        <aside
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+            class="fixed inset-y-0 left-0 z-40 w-64 flex-shrink-0 bg-white flex flex-col border-r border-slate-900/5
+                   transform transition-transform duration-200 ease-in-out
+                   lg:static lg:translate-x-0 lg:z-auto">
+
+            {{-- Brand --}}
+            <div class="flex items-center gap-3 px-6 h-24 border-b border-slate-900/5">
+                <img src="{{ asset('build/assets/logo.jpg') }}" alt="YAPNUSDA"
+                    class="h-11 w-11 rounded-sm object-cover ring-1 ring-slate-200">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-blue-600">Sia-Palla</p>
+                    <p class="text-sm font-bold text-slate-900 leading-tight">Sistem Akademik</p>
+                </div>
             </div>
 
             <nav class="flex-1 py-4">
@@ -42,44 +60,62 @@
                 ];
                 @endphp
 
-                @foreach ($menus as $menu)
-                @php $active = request()->routeIs(explode('.', $menu['route'])[0].'*'); @endphp
-                <a href="{{ Route::has($menu['route']) ? route($menu['route']) : '#' }}"
-                    class="flex items-center gap-3 px-6 py-3 text-sm transition
-                      {{ $active ? 'bg-indigo-50 text-indigo-600 font-semibold border-l-4 border-indigo-500' : 'text-slate-500 hover:bg-gray-100 hover:text-slate-800' }}">
-                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $menu['icon'] }}" />
-                    </svg>
-                    <span>{{ $menu['label'] }}</span>
-                </a>
-                @endforeach
+                <div class="space-y-1 px-3">
+                    @foreach ($menus as $menu)
+                    @php $active = request()->routeIs(explode('.', $menu['route'])[0].'*'); @endphp
+                    <a href="{{ Route::has($menu['route']) ? route($menu['route']) : '#' }}"
+                        @click="sidebarOpen = false"
+                        class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm transition
+                          {{ $active
+                              ? 'bg-blue-50 text-blue-600 font-semibold ring-1 ring-blue-500/10'
+                              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                        <svg class="h-[18px] w-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $menu['icon'] }}" />
+                        </svg>
+                        <span>{{ $menu['label'] }}</span>
+                    </a>
+                    @endforeach
+                </div>
             </nav>
+
+            <p class="px-6 py-5 text-[11px] text-slate-400">© {{ date('Y') }} SIA-PALLA</p>
         </aside>
 
         {{-- Main content --}}
-        <div class="flex-1 flex flex-col">
-            {{-- Top bar --}}
-            <header class="h-20 bg-white border-b flex items-center justify-between px-8">
-                <h1 class="text-xl font-semibold text-slate-800">{{ $title ?? 'Dashboard' }}</h1>
+        <div class="flex-1 flex flex-col min-w-0">
 
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-600">{{ auth()->user()->name ?? '' }}</span>
+            {{-- Top bar --}}
+            <header class="h-20 flex-shrink-0 bg-white border-b border-slate-900/5 flex items-center justify-between px-4 sm:px-8">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button type="button" @click="sidebarOpen = true"
+                        class="lg:hidden flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-50 hover:text-slate-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-widest text-blue-600">Portal Akademik</p>
+                        <h1 class="text-xl font-bold text-slate-900 truncate">{{ $title ?? 'Dashboard' }}</h1>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 flex-shrink-0">
+                    <span class="hidden sm:inline text-sm text-slate-500">{{ auth()->user()->name ?? '' }}</span>
 
                     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                         <button type="button" @click="open = !open"
-                            class="w-10 h-10 rounded-full border flex items-center justify-center text-slate-500 hover:bg-gray-100">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </button>
 
-                        <div x-show="open" x-cloak
-                            x-transition
-                            class="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10">
-                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Profil</a>
+                        <div x-show="open" x-cloak x-transition
+                            class="absolute right-0 mt-2 w-44 overflow-hidden rounded-xl bg-white shadow-xl shadow-slate-900/10 ring-1 ring-slate-900/5 z-10">
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50">Profil</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
+                                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                                     Logout
                                 </button>
                             </form>
@@ -88,15 +124,15 @@
                 </div>
             </header>
 
-            <main class="flex-1 p-8">
+            <main class="flex-1 p-4 sm:p-6 lg:p-8">
                 @if (session('success'))
-                <div id="alert-success" class="mb-5 p-3 rounded bg-green-100 text-green-700 text-sm">
+                <div id="alert-success" class="mb-5 flex items-center gap-2 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 ring-1 ring-green-600/10">
                     {{ session('success') }}
                 </div>
                 @endif
 
                 @if (session('error'))
-                <div id="alert-error" class="mb-5 p-3 rounded bg-red-100 text-red-700 text-sm">
+                <div id="alert-error" class="mb-5 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-600/10">
                     {{ session('error') }}
                 </div>
                 @endif
@@ -124,6 +160,7 @@
             </main>
         </div>
     </div>
+
 </body>
 
 </html>

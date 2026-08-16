@@ -20,7 +20,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('guru', GuruController::class);
     Route::resource('orang-tua', OrangTuaController::class)->parameters(['orang-tua' => 'orang_tua']);
     Route::resource('mata-pelajaran', MataPelajaranController::class)->parameters(['mata-pelajaran' => 'mata_pelajaran']);
-    Route::resource('kelas', KelasController::class);
+    Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
     Route::resource('nilai-akademik', NilaiAkademikController::class)->parameters(['nilai-akademik' => 'nilai_akademik']);
 
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
@@ -28,4 +28,4 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
