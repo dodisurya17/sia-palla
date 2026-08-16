@@ -1,7 +1,7 @@
 <x-guest-layout>
     {{-- Brand — mobile only --}}
     <div class="mb-8 flex items-center gap-3 lg:hidden">
-        <img src="{{ asset('build/assets/logo.jpg') }}" alt="YAPNUSDA" class="h-11 w-11 rounded-lg object-cover ring-1 ring-slate-200">
+        <img src="{{ asset('images/logo.jpg') }}" alt="YAPNUSDA" class="h-11 w-11 rounded-lg object-cover ring-1 ring-slate-200">
         <div>
             <p class="text-sm font-semibold text-slate-900">Sistem Informasi Akademik</p>
             <p class="text-xs text-slate-400">Portal Akademik YAPNUSDA</p>
@@ -71,12 +71,6 @@
                 <input type="checkbox" name="remember" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/40">
                 Ingat saya
             </label>
-
-            @if (Route::has('password.request'))
-            <a href="{{ route('password.request') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700">
-                Lupa password?
-            </a>
-            @endif
         </div>
 
         {{-- Submit --}}
@@ -87,12 +81,5 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
             </svg>
         </button>
-
-        @if (Route::has('register'))
-        <p class="pt-2 text-center text-sm text-slate-500">
-            Belum punya akun?
-            <a href="{{ route('register') }}" class="font-semibold text-blue-600 hover:text-blue-700">Daftar di sini</a>
-        </p>
-        @endif
     </form>
 </x-guest-layout>

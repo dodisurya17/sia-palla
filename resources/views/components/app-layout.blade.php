@@ -39,7 +39,7 @@
 
             {{-- Brand --}}
             <div class="flex items-center gap-3 px-6 h-24 border-b border-slate-900/5">
-                <img src="{{ asset('build/assets/logo.jpg') }}" alt="YAPNUSDA"
+                <img src="{{ asset('images/logo.jpg') }}" alt="YAPNUSDA"
                     class="h-11 w-11 rounded-sm object-cover ring-1 ring-slate-200">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-widest text-blue-600">Sia-Palla</p>

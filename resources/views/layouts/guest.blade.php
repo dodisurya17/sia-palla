@@ -49,7 +49,7 @@
                 <div class="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-white/10 blur-3xl"></div>
 
                 <div class="relative">
-                    <img src="{{ asset('build/assets/logo.jpg') }}" alt="YAPNUSDA" class="h-14 w-14 rounded-sm object-cover">
+                    <img src="{{ asset('images/logo.jpg') }}" alt="YAPNUSDA" class="h-14 w-14 rounded-sm object-cover">
                     <p class="mt-8 text-sm font-medium uppercase tracking-widest text-blue-100">Sia-Palla</p>
                     <h1 class="mt-3 text-3xl font-bold leading-snug">
                         Sistem Informasi<br>Akademik

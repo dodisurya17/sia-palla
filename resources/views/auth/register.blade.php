@@ -4,7 +4,7 @@
         {{-- Header card --}}
         <div class="bg-white border border-b-0 rounded-t-lg px-8 py-6 text-center">
             <p class="font-semibold mb-3">Sistem Informasi Akademik</p>
-            <img src="{{ asset('build/assets/logo.jpg') }}" alt="Logo" class="mx-auto w-14 h-14 object-cover">
+            <img src="{{ asset('images/logo.jpg') }}" alt="Logo" class="mx-auto w-14 h-14 object-cover">
         </div>
 
         <div class="bg-white border rounded-b-lg px-8 py-6">
