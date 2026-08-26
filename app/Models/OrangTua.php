@@ -18,4 +18,9 @@ class OrangTua extends Model
     {
         return $this->hasMany(Siswa::class);
     }
+
+    public function user(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\User::class);
+    }
 }

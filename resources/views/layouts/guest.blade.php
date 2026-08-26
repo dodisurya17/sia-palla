@@ -18,8 +18,8 @@
 
 <body class="font-sans text-slate-900 antialiased">
 
-    <div class="min-h-screen flex items-center justify-center bg-slate-50 p-4 sm:p-6">
-        <div class="w-full max-w-5xl bg-white rounded-3xl shadow-xl shadow-slate-900/5 ring-1 ring-slate-900/5 overflow-hidden lg:flex">
+    <div class="min-h-screen flex items-center justify-center bg-blue-50 p-4 sm:p-6">
+        <div class="w-full max-w-5xl bg-white rounded-3xl shadow-xl shadow-slate-900/10 ring-1 ring-slate-900/5 overflow-hidden lg:flex">
 
             {{-- Brand panel — desktop only --}}
             <div class="relative hidden lg:flex lg:w-[42%] flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 p-10 text-white">

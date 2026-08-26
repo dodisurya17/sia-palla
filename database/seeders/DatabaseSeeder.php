@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             AkademikSeeder::class,
             GuruSeeder::class,
             SiswaSeeder::class,
+            NilaiAkademikSeeder::class,
+            RoleUserSeeder::class
         ]);
     }
 }

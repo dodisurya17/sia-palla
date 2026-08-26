@@ -57,6 +57,11 @@ class OrangTuaController extends Controller
 
     public function show(OrangTua $orang_tua)
     {
+        $user = auth()->user();
+        if ($user->isOrangTua() && $user->orang_tua_id !== $orang_tua->id) {
+            abort(403);
+        }
+
         $orang_tua->load('siswa.kelas');
 
         return view('orang-tua.show', ['orangTua' => $orang_tua]);

@@ -24,4 +24,9 @@ class Guru extends Model
     {
         return $this->hasMany(NilaiAkademik::class);
     }
+
+    public function user(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\User::class);
+    }
 }

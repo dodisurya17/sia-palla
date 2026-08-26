@@ -50,6 +50,11 @@ class GuruController extends Controller
 
     public function show(Guru $guru)
     {
+        $user = auth()->user();
+        if ($user->isGuru() && $user->guru_id !== $guru->id) {
+            abort(403);
+        }
+
         $guru->load('mataPelajaran', 'nilaiAkademik');
 
         return view('guru.show', compact('guru'));
@@ -82,5 +87,24 @@ class GuruController extends Controller
         $guru->delete();
 
         return redirect()->route('guru.index')->with('success', 'Data guru berhasil dihapus.');
+    }
+
+    public function buatAkun(Guru $guru)
+    {
+        if ($guru->user) {
+            return back()->with('error', 'Guru ini sudah memiliki akun login.');
+        }
+
+        $password = str()->random(10);
+
+        $user = \App\Models\User::create([
+            'name' => $guru->nama,
+            'email' => $guru->email ?? strtolower(str_replace(' ', '.', $guru->nama)) . '@siapalla.my.id',
+            'password' => bcrypt($password),
+            'role' => \App\Models\User::ROLE_GURU,
+            'guru_id' => $guru->id,
+        ]);
+
+        return back()->with('success', "Akun dibuat. Email: {$user->email}, Password sementara: {$password}");
     }
 }

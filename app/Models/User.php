@@ -7,9 +7,15 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
+
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_GURU = 'guru';
+    public const ROLE_ORANG_TUA = 'orang_tua';
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
@@ -22,6 +28,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'guru_id',
+        'orang_tua_id',
     ];
 
     /**
@@ -45,5 +54,30 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function guru(): BelongsTo
+    {
+        return $this->belongsTo(Guru::class);
+    }
+
+    public function orangTua(): BelongsTo
+    {
+        return $this->belongsTo(OrangTua::class, 'orang_tua_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isGuru(): bool
+    {
+        return $this->role === self::ROLE_GURU;
+    }
+
+    public function isOrangTua(): bool
+    {
+        return $this->role === self::ROLE_ORANG_TUA;
     }
 }

@@ -105,10 +105,10 @@
         {{-- Card: Nilai Akademik --}}
         @php
         $nilaiPerSemester = $siswa->nilaiAkademik->groupBy('semester');
-        $semesterList = [1, 2, 3];
+        $semesterList = ['Ganjil', 'Genap'];
         @endphp
 
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm" x-data="{ tab: 1 }">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm" x-data="{ tab: 'Ganjil' }">
             <div class="p-6 sm:p-8">
                 <div class="flex items-center gap-2 mb-4">
                     <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -121,8 +121,8 @@
                 <div class="flex gap-1 mb-5 bg-slate-100 rounded-lg p-1 w-fit">
                     @foreach ($semesterList as $s)
                     <button type="button"
-                        @click="tab = {{ $s }}"
-                        :class="tab === {{ $s }} ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                        @click="tab = '{{ $s }}'"
+                        :class="tab === '{{ $s }}' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
                         class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors">
                         Semester {{ $s }}
                     </button>
@@ -131,7 +131,7 @@
 
                 {{-- Konten per semester --}}
                 @foreach ($semesterList as $s)
-                <div x-show="tab === {{ $s }}" x-cloak>
+                <div x-show="tab === '{{ $s }}'" x-cloak>
                     <div class="overflow-hidden rounded-xl border border-slate-100">
                         <table class="w-full text-sm">
                             <thead>

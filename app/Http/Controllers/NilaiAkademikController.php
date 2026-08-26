@@ -12,9 +12,19 @@ class NilaiAkademikController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
         $search = $request->query('search');
 
-        $nilaiAkademik = NilaiAkademik::with(['siswa', 'mataPelajaran', 'guru'])
+        $query = NilaiAkademik::with(['siswa', 'mataPelajaran', 'guru']);
+
+        if ($user->isGuru()) {
+            $query->where('guru_id', $user->guru_id);
+        } elseif ($user->isOrangTua()) {
+            $anakIds = $user->orangTua->siswa()->pluck('id');
+            $query->whereIn('siswa_id', $anakIds);
+        }
+
+        $nilaiAkademik = $query
             ->when($search, function ($query, $search) {
                 $query->whereHas('siswa', function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%");
@@ -31,9 +41,11 @@ class NilaiAkademikController extends Controller
 
     public function create()
     {
+        $user = auth()->user();
+
         return view('nilai-akademik.create', [
             'siswa' => Siswa::orderBy('nama')->get(),
-            'guru' => Guru::orderBy('nama')->get(),
+            'guru' => $user->isGuru() ? $user->guru()->get() : Guru::orderBy('nama')->get(),
             'mataPelajaran' => MataPelajaran::orderBy('nama_mapel')->get(),
             'nilai' => new NilaiAkademik(),
         ]);
@@ -42,6 +54,7 @@ class NilaiAkademikController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateData($request);
+        $this->assertGuruBoundary($validated['guru_id']);
         $validated['nilai_akhir'] = $this->hitungNilaiAkhir($validated);
 
         NilaiAkademik::create($validated);
@@ -52,6 +65,8 @@ class NilaiAkademikController extends Controller
 
     public function show(NilaiAkademik $nilai_akademik)
     {
+        $this->assertViewBoundary($nilai_akademik);
+
         $nilai_akademik->load(['siswa', 'mataPelajaran', 'guru']);
 
         return view('nilai-akademik.show', ['nilai' => $nilai_akademik]);
@@ -59,17 +74,24 @@ class NilaiAkademikController extends Controller
 
     public function edit(NilaiAkademik $nilai_akademik)
     {
+        $this->assertGuruBoundary($nilai_akademik->guru_id);
+
+        $user = auth()->user();
+
         return view('nilai-akademik.edit', [
             'nilai' => $nilai_akademik,
             'siswa' => Siswa::orderBy('nama')->get(),
-            'guru' => Guru::orderBy('nama')->get(),
+            'guru' => $user->isGuru() ? $user->guru()->get() : Guru::orderBy('nama')->get(),
             'mataPelajaran' => MataPelajaran::orderBy('nama_mapel')->get(),
         ]);
     }
 
     public function update(Request $request, NilaiAkademik $nilai_akademik)
     {
+        $this->assertGuruBoundary($nilai_akademik->guru_id);
+
         $validated = $this->validateData($request);
+        $this->assertGuruBoundary($validated['guru_id']);
         $validated['nilai_akhir'] = $this->hitungNilaiAkhir($validated);
 
         $nilai_akademik->update($validated);
@@ -80,6 +102,8 @@ class NilaiAkademikController extends Controller
 
     public function destroy(NilaiAkademik $nilai_akademik)
     {
+        $this->assertGuruBoundary($nilai_akademik->guru_id);
+
         $nilai_akademik->delete();
 
         return redirect()->route('nilai-akademik.index')
@@ -111,5 +135,33 @@ class NilaiAkademikController extends Controller
             ($data['nilai_tugas'] * 0.3) + ($data['nilai_uts'] * 0.3) + ($data['nilai_uas'] * 0.4),
             2
         );
+    }
+
+    /**
+     * Guru hanya boleh input/ubah/hapus nilai atas namanya sendiri.
+     */
+    private function assertGuruBoundary(int $guruId): void
+    {
+        $user = auth()->user();
+
+        if ($user->isGuru() && $user->guru_id !== $guruId) {
+            abort(403, 'Anda hanya bisa mengelola nilai yang Anda input sendiri.');
+        }
+    }
+
+    /**
+     * Batasi akses show(): guru hanya nilai miliknya, orang tua hanya nilai anaknya.
+     */
+    private function assertViewBoundary(NilaiAkademik $nilai): void
+    {
+        $user = auth()->user();
+
+        if ($user->isGuru() && $user->guru_id !== $nilai->guru_id) {
+            abort(403);
+        }
+
+        if ($user->isOrangTua() && !$user->orangTua->siswa()->where('id', $nilai->siswa_id)->exists()) {
+            abort(403);
+        }
     }
 }
