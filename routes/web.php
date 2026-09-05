@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\MataPelajaranController;
+use App\Http\Controllers\EkstrakurikulerController;
 use App\Http\Controllers\NilaiAkademikController;
 use App\Http\Controllers\OrangTuaController;
 use App\Http\Controllers\SiswaController;
@@ -28,6 +29,15 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('guru', GuruController::class)->except(['show']);
         Route::resource('orang-tua', OrangTuaController::class)->except(['show'])->parameters(['orang-tua' => 'orang_tua']);
         Route::resource('mata-pelajaran', MataPelajaranController::class)->parameters(['mata-pelajaran' => 'mata_pelajaran']);
+        Route::resource('ekstrakurikuler', EkstrakurikulerController::class);
+        Route::prefix('nilai-ekstrakurikuler')->name('nilai-ekstrakurikuler.')->group(function () {
+            Route::get('/create', [EkstrakurikulerController::class, 'nilaiCreate'])->name('create');
+            Route::post('/', [EkstrakurikulerController::class, 'nilaiStore'])->name('store');
+            Route::get('/{nilai}', [EkstrakurikulerController::class, 'nilaiShow'])->name('show');
+            Route::get('/{nilai}/edit', [EkstrakurikulerController::class, 'nilaiEdit'])->name('edit');
+            Route::put('/{nilai}', [EkstrakurikulerController::class, 'nilaiUpdate'])->name('update');
+            Route::delete('/{nilai}', [EkstrakurikulerController::class, 'nilaiDestroy'])->name('destroy');
+        });
         Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
         Route::post('/guru/{guru}/buat-akun', [GuruController::class, 'buatAkun'])->name('guru.buat-akun');
     });

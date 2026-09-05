@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
+use App\Models\Ekstrakurikuler;
 use App\Models\OrangTua;
 use Illuminate\Database\Seeder;
 
@@ -12,30 +13,35 @@ class AkademikSeeder extends Seeder
     public function run(): void
     {
         Kelas::insert([
-            ['nama_kelas' => 'X IPA 1', 'tingkat' => 'X', 'wali_kelas' => 'Bpk. Yohanes', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'X IPA 2', 'tingkat' => 'X', 'wali_kelas' => 'Ibu Ratna', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'X IPS 1', 'tingkat' => 'X', 'wali_kelas' => 'Bpk. Slamet', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'XI IPA 1', 'tingkat' => 'XI', 'wali_kelas' => 'Ibu Maria', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'XI IPA 2', 'tingkat' => 'XI', 'wali_kelas' => 'Bpk. Hendra', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'XI IPS 1', 'tingkat' => 'XI', 'wali_kelas' => 'Ibu Dewi', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'XII IPA 1', 'tingkat' => 'XII', 'wali_kelas' => 'Bpk. Anton', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'XII IPA 2', 'tingkat' => 'XII', 'wali_kelas' => 'Ibu Siti', 'created_at' => now(), 'updated_at' => now()],
-            ['nama_kelas' => 'XII IPS 1', 'tingkat' => 'XII', 'wali_kelas' => 'Bpk. Budi', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'VII A', 'tingkat' => 'VII', 'wali_kelas' => 'Bpk. Yohanes', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'VII B', 'tingkat' => 'VII', 'wali_kelas' => 'Ibu Ratna', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'VII C', 'tingkat' => 'VII', 'wali_kelas' => 'Bpk. Slamet', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'VIII A', 'tingkat' => 'VIII', 'wali_kelas' => 'Ibu Maria', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'VIII B', 'tingkat' => 'VIII', 'wali_kelas' => 'Bpk. Hendra', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'VIII C', 'tingkat' => 'VIII', 'wali_kelas' => 'Ibu Dewi', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'IX A', 'tingkat' => 'IX', 'wali_kelas' => 'Bpk. Anton', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'IX B', 'tingkat' => 'IX', 'wali_kelas' => 'Ibu Siti', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_kelas' => 'IX C', 'tingkat' => 'IX', 'wali_kelas' => 'Bpk. Budi', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         MataPelajaran::insert([
             ['kode_mapel' => 'MTK', 'nama_mapel' => 'Matematika', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'BIN', 'nama_mapel' => 'Bahasa Indonesia', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'BIG', 'nama_mapel' => 'Bahasa Inggris', 'kkm' => 72, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'FIS', 'nama_mapel' => 'Fisika', 'kkm' => 70, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'KIM', 'nama_mapel' => 'Kimia', 'kkm' => 70, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'BIO', 'nama_mapel' => 'Biologi', 'kkm' => 72, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'EKO', 'nama_mapel' => 'Ekonomi', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'SOS', 'nama_mapel' => 'Sosiologi', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'SEJ', 'nama_mapel' => 'Sejarah', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'IPA', 'nama_mapel' => 'Ilmu Pengetahuan Alam', 'kkm' => 72, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'IPS', 'nama_mapel' => 'Ilmu Pengetahuan Sosial', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'PKN', 'nama_mapel' => 'Pendidikan Kewarganegaraan', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'PAI', 'nama_mapel' => 'Pendidikan Agama Islam', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'PJK', 'nama_mapel' => 'Pendidikan Jasmani', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'SBD', 'nama_mapel' => 'Seni Budaya', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'PKY', 'nama_mapel' => 'Prakarya', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        Ekstrakurikuler::insert([
+            ['nama_ekstrakurikuler' => 'Pramuka', 'jenis' => 'wajib', 'pembina' => 'Bpk. Yohanes', 'jadwal' => 'Jumat, 14.00 - 16.00', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekstrakurikuler' => 'Bola Voli', 'jenis' => 'pilihan', 'pembina' => 'Bpk. Hendra', 'jadwal' => 'Sabtu, 08.00 - 10.00', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekstrakurikuler' => 'Bulutangkis', 'jenis' => 'pilihan', 'pembina' => 'Ibu Ratna', 'jadwal' => 'Sabtu, 10.00 - 12.00', 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekstrakurikuler' => 'Sepak Bola', 'jenis' => 'pilihan', 'pembina' => 'Bpk. Slamet', 'jadwal' => 'Sabtu, 07.00 - 09.00', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         OrangTua::insert([

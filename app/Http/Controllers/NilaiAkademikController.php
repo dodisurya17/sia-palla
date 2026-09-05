@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\MataPelajaran;
 use App\Models\NilaiAkademik;
+use App\Models\NilaiEkstrakurikuler;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 
@@ -33,10 +34,29 @@ class NilaiAkademikController extends Controller
                 });
             })
             ->latest()
-            ->paginate(10)
+            ->paginate(10, ['*'], 'page_akademik')
             ->withQueryString();
 
-        return view('nilai-akademik.index', compact('nilaiAkademik'));
+        $ekskulQuery = NilaiEkstrakurikuler::with(['siswa', 'ekstrakurikuler']);
+
+        if ($user->isOrangTua()) {
+            $anakIds = $user->orangTua->siswa()->pluck('id');
+            $ekskulQuery->whereIn('siswa_id', $anakIds);
+        }
+
+        $nilaiEkstrakurikuler = $ekskulQuery
+            ->when($search, function ($query, $search) {
+                $query->whereHas('siswa', function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%");
+                })->orWhereHas('ekstrakurikuler', function ($q) use ($search) {
+                    $q->where('nama_ekstrakurikuler', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10, ['*'], 'page_ekskul')
+            ->withQueryString();
+
+        return view('nilai-akademik.index', compact('nilaiAkademik', 'nilaiEkstrakurikuler'));
     }
 
     public function create()
@@ -63,11 +83,15 @@ class NilaiAkademikController extends Controller
             ->with('success', 'Data nilai akademik berhasil ditambahkan.');
     }
 
-    public function show(NilaiAkademik $nilai_akademik)
+    public function show(Request $request, NilaiAkademik $nilai_akademik)
     {
         $this->assertViewBoundary($nilai_akademik);
 
         $nilai_akademik->load(['siswa', 'mataPelajaran', 'guru']);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return view('nilai-akademik.partials.detail', ['nilai' => $nilai_akademik]);
+        }
 
         return view('nilai-akademik.show', ['nilai' => $nilai_akademik]);
     }

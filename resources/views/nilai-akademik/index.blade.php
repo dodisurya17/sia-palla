@@ -2,6 +2,7 @@
     <x-slot name="title">Nilai Akademik</x-slot>
 
     <div x-data="{
+        activeTab: '{{ request('tab', 'akademik') }}',
         deleteFormId: null,
         deleteName: '',
         showModalOpen: false,
@@ -24,7 +25,7 @@
         }
     }">
 
-        {{-- Single merged container: header, search, table --}}
+        {{-- Single merged container: header, tabs, search, table --}}
         <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
 
             {{-- Header --}}
@@ -41,10 +42,28 @@
                     </div>
                 </div>
 
-                <a href="{{ route('nilai-akademik.create') }}"
+                <a x-show="activeTab === 'akademik'" href="{{ route('nilai-akademik.create') }}"
                     class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium">
                     + Tambah Nilai
                 </a>
+                <a x-show="activeTab === 'ekstrakurikuler'" href="{{ route('nilai-ekstrakurikuler.create') }}"
+                    class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium">
+                    + Tambah Nilai Ekstrakurikuler
+                </a>
+            </div>
+
+            {{-- Tabs --}}
+            <div class="px-6 pt-4 flex gap-1 border-b border-gray-100">
+                <button type="button" @click="activeTab = 'akademik'"
+                    :class="activeTab === 'akademik' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition">
+                    Akademik
+                </button>
+                <button type="button" @click="activeTab = 'ekstrakurikuler'"
+                    :class="activeTab === 'ekstrakurikuler' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition">
+                    Ekstrakurikuler
+                </button>
             </div>
 
             {{-- Search --}}
@@ -75,8 +94,8 @@
                 </form>
             </div>
 
-            {{-- Table --}}
-            <div class="overflow-x-auto">
+            {{-- Table Akademik --}}
+            <div x-show="activeTab === 'akademik'" class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b text-left text-slate-500 uppercase text-xs tracking-wider">
@@ -157,13 +176,98 @@
                         @endforelse
                     </tbody>
                 </table>
+
+                @if ($nilaiAkademik->hasPages())
+                <div class="px-6 py-4 border-t border-gray-100">
+                    {{ $nilaiAkademik->links() }}
+                </div>
+                @endif
             </div>
 
-            @if ($nilaiAkademik->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100">
-                {{ $nilaiAkademik->links() }}
+            {{-- Table Ekstrakurikuler --}}
+            <div x-show="activeTab === 'ekstrakurikuler'" x-cloak class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 border-b text-left text-slate-500 uppercase text-xs tracking-wider">
+                            <th class="px-6 py-4 font-medium">Siswa</th>
+                            <th class="px-6 py-4 font-medium">Ekstrakurikuler</th>
+                            <th class="px-6 py-4 font-medium">Semester</th>
+                            <th class="px-6 py-4 font-medium">Predikat</th>
+                            <th class="px-6 py-4 font-medium text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($nilaiEkstrakurikuler as $nilai)
+                        <tr class="hover:bg-gray-50/60 transition">
+                            <td class="px-6 py-4 text-slate-700 font-medium">{{ $nilai->siswa->nama ?? '-' }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $nilai->ekstrakurikuler->nama_ekstrakurikuler ?? '-' }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $nilai->semester }}</td>
+                            <td class="px-6 py-4">
+                                @php
+                                $predikatColor = match ($nilai->predikat) {
+                                'Sangat Baik' => 'bg-green-50 text-green-700',
+                                'Baik' => 'bg-blue-50 text-blue-700',
+                                'Cukup' => 'bg-amber-50 text-amber-700',
+                                default => 'bg-red-50 text-red-700',
+                                };
+                                @endphp
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $predikatColor }} text-xs font-semibold">
+                                    {{ $nilai->predikat }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button"
+                                        @click="openShowModal('{{ route('nilai-ekstrakurikuler.show', $nilai) }}')"
+                                        class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                                        title="Detail">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                    <a href="{{ route('nilai-ekstrakurikuler.edit', $nilai) }}"
+                                        class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                                        title="Edit">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </a>
+                                    <button type="button"
+                                        @click="deleteFormId = 'delete-form-ekskul-{{ $nilai->id }}'; deleteName = ('{{ $nilai->siswa->nama ?? 'data ini' }}') + ' - ' + ('{{ $nilai->ekstrakurikuler->nama_ekstrakurikuler ?? '' }}')"
+                                        class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                    <form id="delete-form-ekskul-{{ $nilai->id }}" method="POST"
+                                        action="{{ route('nilai-ekstrakurikuler.destroy', $nilai) }}" class="hidden">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-16 text-center text-slate-400">
+                                <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 100-6 3 3 0 000 6zM12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-12.728l1.414 1.414M16.95 16.95l1.414 1.414" />
+                                </svg>
+                                Belum ada data nilai ekstrakurikuler.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                @if ($nilaiEkstrakurikuler->hasPages())
+                <div class="px-6 py-4 border-t border-gray-100">
+                    {{ $nilaiEkstrakurikuler->links() }}
+                </div>
+                @endif
             </div>
-            @endif
 
         </div>
         {{-- /Single merged container --}}
@@ -178,12 +282,13 @@
                     class="relative bg-white rounded-2xl shadow-xl w-full max-w-sm mx-auto p-6">
                     <div class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-slate-800 mb-1">Hapus Nilai Akademik?</h3>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-1">Hapus Data?</h3>
                     <p class="text-sm text-slate-500 mb-6">
-                        Anda yakin ingin menghapus nilai <span class="font-medium text-slate-700" x-text="deleteName"></span>?
+                        Anda yakin ingin menghapus <span class="font-medium text-slate-700" x-text="deleteName"></span>?
                         Tindakan ini tidak dapat dibatalkan.
                     </p>
                     <div class="flex gap-3">

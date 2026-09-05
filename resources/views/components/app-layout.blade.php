@@ -89,6 +89,12 @@
                 'roles' => ['admin'],
                 ],
                 [
+                'route' => 'ekstrakurikuler.index',
+                'label' => 'Ekstrakurikuler',
+                'icon' => 'M12 15a3 3 0 100-6 3 3 0 000 6zM12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-12.728l1.414 1.414M16.95 16.95l1.414 1.414',
+                'roles' => ['admin'],
+                ],
+                [
                 'route' => 'kelas.index',
                 'label' => 'Kelas',
                 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0l2 0M5 21l-2 0M9 7h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1',
