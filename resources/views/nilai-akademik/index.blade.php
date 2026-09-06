@@ -101,8 +101,10 @@
                         <tr class="bg-gray-50 border-b text-left text-slate-500 uppercase text-xs tracking-wider">
                             <th class="px-6 py-4 font-medium">Siswa</th>
                             <th class="px-6 py-4 font-medium">Mata Pelajaran</th>
-                            <th class="px-6 py-4 font-medium">Guru</th>
                             <th class="px-6 py-4 font-medium">Semester</th>
+                            <th class="px-6 py-4 font-medium">Nilai Tugas</th>
+                            <th class="px-6 py-4 font-medium">Nilai UTS</th>
+                            <th class="px-6 py-4 font-medium">Nilai UAS</th>
                             <th class="px-6 py-4 font-medium">Nilai Akhir</th>
                             <th class="px-6 py-4 font-medium text-right">Aksi</th>
                         </tr>
@@ -117,8 +119,10 @@
                                 </span>
                                 <span class="text-slate-600">{{ $nilai->mataPelajaran->nama_mapel ?? '-' }}</span>
                             </td>
-                            <td class="px-6 py-4 text-slate-600">{{ $nilai->guru->nama ?? '-' }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $nilai->semester }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_tugas }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_uts }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_uas }}</td>
                             <td class="px-6 py-4">
                                 @php
                                 $nilaiAkhir = $nilai->nilai_akhir;
@@ -166,7 +170,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-16 text-center text-slate-400">
+                            <td colspan="8" class="px-6 py-16 text-center text-slate-400">
                                 <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -192,6 +196,7 @@
                             <th class="px-6 py-4 font-medium">Siswa</th>
                             <th class="px-6 py-4 font-medium">Ekstrakurikuler</th>
                             <th class="px-6 py-4 font-medium">Semester</th>
+                            <th class="px-6 py-4 font-medium">Nilai</th>
                             <th class="px-6 py-4 font-medium">Predikat</th>
                             <th class="px-6 py-4 font-medium text-right">Aksi</th>
                         </tr>
@@ -202,6 +207,11 @@
                             <td class="px-6 py-4 text-slate-700 font-medium">{{ $nilai->siswa->nama ?? '-' }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $nilai->ekstrakurikuler->nama_ekstrakurikuler ?? '-' }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $nilai->semester }}</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono text-xs font-semibold">
+                                    {{ $nilai->nilai }}
+                                </span>
+                            </td>
                             <td class="px-6 py-4">
                                 @php
                                 $predikatColor = match ($nilai->predikat) {
@@ -251,7 +261,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-16 text-center text-slate-400">
+                            <td colspan="6" class="px-6 py-16 text-center text-slate-400">
                                 <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 100-6 3 3 0 000 6zM12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-12.728l1.414 1.414M16.95 16.95l1.414 1.414" />
                                 </svg>

@@ -23,7 +23,16 @@ class NilaiEkstrakurikulerSeeder extends Seeder
         $wajib = $ekstrakurikuler->where('jenis', 'wajib');
         $pilihan = $ekstrakurikuler->where('jenis', 'pilihan');
 
-        $predikatList = ['Sangat Baik', 'Baik', 'Cukup', 'Kurang'];
+        // Nilai (A-E) menentukan predikat secara otomatis
+        $nilaiToPredikat = [
+            'A' => 'Sangat Baik',
+            'B' => 'Baik',
+            'C' => 'Cukup',
+            'D' => 'Kurang',
+            'E' => 'Kurang',
+        ];
+        $nilaiList = array_keys($nilaiToPredikat);
+
         $semesterList = ['Ganjil', 'Genap'];
         $rows = [];
 
@@ -39,11 +48,14 @@ class NilaiEkstrakurikulerSeeder extends Seeder
 
             foreach ($ekskulSiswa as $ekskul) {
                 foreach ($semesterList as $semester) {
+                    $nilai = $nilaiList[array_rand($nilaiList)];
+
                     $rows[] = [
                         'siswa_id' => $s->id,
                         'ekstrakurikuler_id' => $ekskul->id,
                         'semester' => $semester,
-                        'predikat' => $predikatList[array_rand($predikatList)],
+                        'nilai' => $nilai,
+                        'predikat' => $nilaiToPredikat[$nilai],
                         'keterangan' => null,
                         'created_at' => now(),
                         'updated_at' => now(),

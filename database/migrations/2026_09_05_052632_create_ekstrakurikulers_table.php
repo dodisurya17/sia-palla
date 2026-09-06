@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('siswa_id')->constrained('siswa')->cascadeOnDelete();
             $table->foreignId('ekstrakurikuler_id')->constrained('ekstrakurikulers')->cascadeOnDelete();
             $table->string('semester');
+            $table->enum('nilai', ['A', 'B', 'C', 'D', 'E']);
             $table->enum('predikat', ['Sangat Baik', 'Baik', 'Cukup', 'Kurang']);
             $table->text('keterangan')->nullable();
             $table->timestamps();
