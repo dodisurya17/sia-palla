@@ -6,7 +6,6 @@ use App\Models\Guru;
 use App\Models\MataPelajaran;
 use App\Models\NilaiAkademik;
 use App\Models\NilaiEkstrakurikuler;
-use App\Models\Semester;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
 
@@ -17,10 +16,7 @@ class NilaiAkademikController extends Controller
         $user = auth()->user();
         $search = $request->query('search');
 
-        $semesterAktif = Semester::current();
-
-        $query = NilaiAkademik::with(['siswa', 'mataPelajaran', 'guru', 'periode'])
-            ->where('semester_id', $semesterAktif?->id ?? 0);
+        $query = NilaiAkademik::with(['siswa', 'mataPelajaran', 'guru']);
 
         if ($user->isGuru()) {
             $query->where('guru_id', $user->guru_id);
@@ -31,13 +27,10 @@ class NilaiAkademikController extends Controller
 
         $nilaiAkademik = $query
             ->when($search, function ($query, $search) {
-                // Dibungkus satu grup agar OR tidak melepas filter semester & role.
-                $query->where(function ($group) use ($search) {
-                    $group->whereHas('siswa', function ($q) use ($search) {
-                        $q->where('nama', 'like', "%{$search}%");
-                    })->orWhereHas('mataPelajaran', function ($q) use ($search) {
-                        $q->where('nama_mapel', 'like', "%{$search}%");
-                    });
+                $query->whereHas('siswa', function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%");
+                })->orWhereHas('mataPelajaran', function ($q) use ($search) {
+                    $q->where('nama_mapel', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -63,7 +56,7 @@ class NilaiAkademikController extends Controller
             ->paginate(10, ['*'], 'page_ekskul')
             ->withQueryString();
 
-        return view('nilai-akademik.index', compact('nilaiAkademik', 'nilaiEkstrakurikuler', 'semesterAktif'));
+        return view('nilai-akademik.index', compact('nilaiAkademik', 'nilaiEkstrakurikuler'));
     }
 
     public function create()
@@ -74,8 +67,7 @@ class NilaiAkademikController extends Controller
             'siswa' => Siswa::orderBy('nama')->get(),
             'guru' => $user->isGuru() ? $user->guru()->get() : Guru::orderBy('nama')->get(),
             'mataPelajaran' => MataPelajaran::orderBy('nama_mapel')->get(),
-            'semester' => Semester::urutTerbaru()->get(),
-            'nilai' => new NilaiAkademik(['semester_id' => Semester::current()?->id]),
+            'nilai' => new NilaiAkademik(),
         ]);
     }
 
@@ -84,7 +76,6 @@ class NilaiAkademikController extends Controller
         $validated = $this->validateData($request);
         $this->assertGuruBoundary($validated['guru_id']);
         $validated['nilai_akhir'] = $this->hitungNilaiAkhir($validated);
-        $validated['semester'] = Semester::findOrFail($validated['semester_id'])->jenis;
 
         NilaiAkademik::create($validated);
 
@@ -96,7 +87,7 @@ class NilaiAkademikController extends Controller
     {
         $this->assertViewBoundary($nilai_akademik);
 
-        $nilai_akademik->load(['siswa', 'mataPelajaran', 'guru', 'periode']);
+        $nilai_akademik->load(['siswa', 'mataPelajaran', 'guru']);
 
         if ($request->ajax() || $request->wantsJson()) {
             return view('nilai-akademik.partials.detail', ['nilai' => $nilai_akademik]);
@@ -116,7 +107,6 @@ class NilaiAkademikController extends Controller
             'siswa' => Siswa::orderBy('nama')->get(),
             'guru' => $user->isGuru() ? $user->guru()->get() : Guru::orderBy('nama')->get(),
             'mataPelajaran' => MataPelajaran::orderBy('nama_mapel')->get(),
-            'semester' => Semester::urutTerbaru()->get(),
         ]);
     }
 
@@ -127,7 +117,6 @@ class NilaiAkademikController extends Controller
         $validated = $this->validateData($request);
         $this->assertGuruBoundary($validated['guru_id']);
         $validated['nilai_akhir'] = $this->hitungNilaiAkhir($validated);
-        $validated['semester'] = Semester::findOrFail($validated['semester_id'])->jenis;
 
         $nilai_akademik->update($validated);
 
@@ -154,7 +143,7 @@ class NilaiAkademikController extends Controller
             'siswa_id' => ['required', 'exists:siswa,id'],
             'mata_pelajaran_id' => ['required', 'exists:mata_pelajaran,id'],
             'guru_id' => ['required', 'exists:guru,id'],
-            'semester_id' => ['required', 'exists:semester,id'],
+            'semester' => ['required', 'in:Ganjil,Genap'],
             'nilai_tugas' => ['required', 'numeric', 'min:0', 'max:100'],
             'nilai_uts' => ['required', 'numeric', 'min:0', 'max:100'],
             'nilai_uas' => ['required', 'numeric', 'min:0', 'max:100'],

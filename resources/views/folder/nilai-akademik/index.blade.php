@@ -38,26 +38,14 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-semibold text-slate-800">Data Nilai Akademik</h2>
-                        <p class="text-sm text-slate-500">
-                            @if ($semesterAktif)
-                            Semester aktif: <span class="font-medium text-slate-700">{{ $semesterAktif->label }}</span>
-                            @else
-                            Belum ada semester yang berstatus aktif
-                            @endif
-                        </p>
+                        <p class="text-sm text-slate-500">Kelola nilai akademik siswa per mata pelajaran</p>
                     </div>
                 </div>
 
-                <div x-show="activeTab === 'akademik'" class="flex items-center gap-2 flex-wrap">
-                    <a href="{{ route('riwayat-nilai.index') }}"
-                        class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-white border border-gray-200 text-slate-600 shadow-sm hover:bg-gray-50 text-sm font-medium">
-                        Riwayat Nilai
-                    </a>
-                    <a href="{{ route('nilai-akademik.create') }}"
-                        class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium">
-                        + Tambah Nilai
-                    </a>
-                </div>
+                <a x-show="activeTab === 'akademik'" href="{{ route('nilai-akademik.create') }}"
+                    class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium">
+                    + Tambah Nilai
+                </a>
                 <a x-show="activeTab === 'ekstrakurikuler'" href="{{ route('nilai-ekstrakurikuler.create') }}"
                     class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium">
                     + Tambah Nilai Ekstrakurikuler
@@ -124,19 +112,14 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($nilaiAkademik as $nilai)
                         <tr class="hover:bg-gray-50/60 transition">
-                            <td class="px-6 py-4 font-medium">
-                                <a href="{{ route('nilai-siswa.show', ['siswa' => $nilai->siswa_id, 'semester_id' => $nilai->semester_id]) }}"
-                                    class="text-slate-700 hover:text-indigo-600 transition">
-                                    {{ $nilai->siswa->nama ?? '-' }}
-                                </a>
-                            </td>
+                            <td class="px-6 py-4 text-slate-700 font-medium">{{ $nilai->siswa->nama ?? '-' }}</td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600 font-mono text-xs font-semibold">
                                     {{ $nilai->mataPelajaran->kode_mapel ?? '-' }}
                                 </span>
                                 <span class="text-slate-600">{{ $nilai->mataPelajaran->nama_mapel ?? '-' }}</span>
                             </td>
-                            <td class="px-6 py-4 text-slate-600">{{ $nilai->periode->label ?? $nilai->semester }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $nilai->semester }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_tugas }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_uts }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_uas }}</td>
@@ -191,7 +174,7 @@
                                 <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Belum ada data nilai akademik pada semester aktif.
+                                Belum ada data nilai akademik.
                             </td>
                         </tr>
                         @endforelse

@@ -57,17 +57,15 @@ $isEdit = $nilai->exists;
 
     {{-- Semester --}}
     <div>
-        <label for="semester_id" class="block text-sm font-medium text-slate-700 mb-1.5">Semester</label>
-        <select id="semester_id" name="semester_id"
-            class="w-full h-11 px-4 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 outline-none transition @error('semester_id') border-red-300 @enderror">
+        <label for="semester" class="block text-sm font-medium text-slate-700 mb-1.5">Semester</label>
+        <select id="semester" name="semester"
+            class="w-full h-11 px-4 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 outline-none transition @error('semester') border-red-300 @enderror">
             <option value="">-- Pilih Semester --</option>
-            @foreach ($semester as $sem)
-            <option value="{{ $sem->id }}" {{ old('semester_id', $nilai->semester_id) == $sem->id ? 'selected' : '' }}>
-                {{ $sem->label }}{{ $sem->status === 'aktif' ? ' (Aktif)' : '' }}
-            </option>
+            @foreach (['Ganjil', 'Genap'] as $sem)
+            <option value="{{ $sem }}" {{ old('semester', $nilai->semester) == $sem ? 'selected' : '' }}>{{ $sem }}</option>
             @endforeach
         </select>
-        @error('semester_id')
+        @error('semester')
         <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
         @enderror
     </div>

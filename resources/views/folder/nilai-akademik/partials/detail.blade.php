@@ -7,7 +7,7 @@
         </div>
         <div>
             <h3 class="text-lg font-semibold text-slate-800">Detail Nilai Akademik</h3>
-            <p class="text-sm text-slate-500">{{ $nilai->siswa->nama ?? '-' }} &middot; {{ $nilai->periode->label ?? $nilai->semester }}</p>
+            <p class="text-sm text-slate-500">{{ $nilai->siswa->nama ?? '-' }} &middot; {{ $nilai->semester }}</p>
         </div>
     </div>
 
@@ -28,7 +28,7 @@
         </div>
         <div class="bg-gray-50 rounded-xl p-4">
             <dt class="text-xs uppercase tracking-wider text-slate-400 mb-1">Semester</dt>
-            <dd class="text-sm font-medium text-slate-700">{{ $nilai->periode->label ?? $nilai->semester }}</dd>
+            <dd class="text-sm font-medium text-slate-700">{{ $nilai->semester }}</dd>
         </div>
     </dl>
 
