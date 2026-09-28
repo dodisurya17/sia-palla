@@ -19,7 +19,7 @@
         <form method="POST" action="{{ route('nilai-ekstrakurikuler.store') }}" class="p-6">
             @csrf
 
-            @include('nilai-ekstrakurikuler._form')
+            @include('ekstrakurikuler.nilai._form')
 
             <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
                 <a href="{{ route('nilai-akademik.index', ['tab' => 'ekstrakurikuler']) }}"

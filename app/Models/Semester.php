@@ -28,6 +28,11 @@ class Semester extends Model
         return $this->hasMany(NilaiAkademik::class);
     }
 
+    public function nilaiEkstrakurikuler(): HasMany
+    {
+        return $this->hasMany(NilaiEkstrakurikuler::class);
+    }
+
     public function scopeAktif($query)
     {
         return $query->where('status', 'aktif');

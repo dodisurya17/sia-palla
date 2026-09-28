@@ -44,19 +44,20 @@ class NilaiAkademikController extends Controller
             ->paginate(10, ['*'], 'page_akademik')
             ->withQueryString();
 
-        $ekskulQuery = NilaiEkstrakurikuler::with(['siswa', 'ekstrakurikuler']);
-
-        if ($user->isOrangTua()) {
-            $anakIds = $user->orangTua->siswa()->pluck('id');
-            $ekskulQuery->whereIn('siswa_id', $anakIds);
-        }
+        // Nilai ekstrakurikuler juga hanya dari semester aktif.
+        $ekskulQuery = NilaiEkstrakurikuler::with(['siswa', 'ekstrakurikuler', 'periode'])
+            ->visibleTo($user)
+            ->where('semester_id', $semesterAktif?->id ?? 0);
 
         $nilaiEkstrakurikuler = $ekskulQuery
             ->when($search, function ($query, $search) {
-                $query->whereHas('siswa', function ($q) use ($search) {
-                    $q->where('nama', 'like', "%{$search}%");
-                })->orWhereHas('ekstrakurikuler', function ($q) use ($search) {
-                    $q->where('nama_ekstrakurikuler', 'like', "%{$search}%");
+                // Dibungkus satu grup agar OR tidak melepas filter semester & role.
+                $query->where(function ($group) use ($search) {
+                    $group->whereHas('siswa', function ($q) use ($search) {
+                        $q->where('nama', 'like', "%{$search}%");
+                    })->orWhereHas('ekstrakurikuler', function ($q) use ($search) {
+                        $q->where('nama_ekstrakurikuler', 'like', "%{$search}%");
+                    });
                 });
             })
             ->latest()

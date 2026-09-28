@@ -55,6 +55,9 @@
         </div>
 
         {{-- Nilai per mata pelajaran --}}
+        <div class="px-6 pt-5 pb-2">
+            <h3 class="text-sm font-semibold text-slate-700">Nilai Akademik</h3>
+        </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -109,6 +112,55 @@
                     </tr>
                 </tfoot>
                 @endif
+            </table>
+        </div>
+
+        {{-- Nilai ekstrakurikuler --}}
+        <div class="px-6 pt-5 pb-2 border-t border-gray-100">
+            <h3 class="text-sm font-semibold text-slate-700">Nilai Ekstrakurikuler</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b text-left text-slate-500 uppercase text-xs tracking-wider">
+                        <th class="px-6 py-4 font-medium">Ekstrakurikuler</th>
+                        <th class="px-6 py-4 font-medium">Nilai</th>
+                        <th class="px-6 py-4 font-medium">Predikat</th>
+                        <th class="px-6 py-4 font-medium">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse ($nilaiEkskul as $e)
+                    <tr class="hover:bg-gray-50/60 transition">
+                        <td class="px-6 py-4 text-slate-700 font-medium">{{ $e->ekstrakurikuler->nama_ekstrakurikuler ?? '-' }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono text-xs font-semibold">
+                                {{ $e->nilai }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            @php
+                            $predikatColor = match ($e->predikat) {
+                                'Sangat Baik' => 'bg-green-50 text-green-700',
+                                'Baik' => 'bg-blue-50 text-blue-700',
+                                'Cukup' => 'bg-amber-50 text-amber-700',
+                                default => 'bg-red-50 text-red-700',
+                            };
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $predikatColor }} text-xs font-semibold">
+                                {{ $e->predikat }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-500">{{ $e->keterangan ?: '-' }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="px-6 py-10 text-center text-slate-400">
+                            Belum ada nilai ekstrakurikuler pada semester ini.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
     </div>

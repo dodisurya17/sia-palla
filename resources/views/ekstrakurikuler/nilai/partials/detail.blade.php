@@ -7,7 +7,7 @@
         </div>
         <div>
             <h3 class="text-lg font-semibold text-slate-800">Detail Nilai Ekstrakurikuler</h3>
-            <p class="text-sm text-slate-500">{{ $nilai->siswa->nama ?? '-' }} &middot; {{ $nilai->semester }}</p>
+            <p class="text-sm text-slate-500">{{ $nilai->siswa->nama ?? '-' }} &middot; {{ $nilai->periode->label ?? $nilai->semester }}</p>
         </div>
     </div>
 
@@ -21,8 +21,16 @@
             <dd class="text-sm font-medium text-slate-700">{{ $nilai->ekstrakurikuler->nama_ekstrakurikuler ?? '-' }}</dd>
         </div>
         <div class="bg-gray-50 rounded-xl p-4">
+            <dt class="text-xs uppercase tracking-wider text-slate-400 mb-1">Tahun Ajaran</dt>
+            <dd class="text-sm font-medium text-slate-700">{{ $nilai->periode->tahun_ajaran ?? '-' }}</dd>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
             <dt class="text-xs uppercase tracking-wider text-slate-400 mb-1">Semester</dt>
-            <dd class="text-sm font-medium text-slate-700">{{ $nilai->semester }}</dd>
+            <dd class="text-sm font-medium text-slate-700">{{ $nilai->periode->jenis ?? $nilai->semester }}</dd>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <dt class="text-xs uppercase tracking-wider text-slate-400 mb-1">Nilai</dt>
+            <dd class="text-sm font-medium text-slate-700">{{ $nilai->nilai }}</dd>
         </div>
         <div class="bg-gray-50 rounded-xl p-4">
             <dt class="text-xs uppercase tracking-wider text-slate-400 mb-1">Predikat</dt>

@@ -81,6 +81,7 @@
             {{-- Search --}}
             <div class="px-6 py-4 border-b border-gray-100">
                 <form method="GET" action="{{ route('nilai-akademik.index') }}" class="max-w-md">
+                    <input type="hidden" name="tab" :value="activeTab">
                     <div class="flex items-center h-11 gap-2 pl-4 pr-2 bg-gray-100 rounded-full overflow-hidden transition focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/30 focus-within:shadow-sm">
 
                         <input type="text" name="search" value="{{ request('search') }}"
@@ -88,7 +89,7 @@
                             class="w-full min-w-0 h-full text-sm bg-transparent border-none outline-none ring-0 focus:ring-0 focus:outline-none placeholder:text-slate-400">
 
                         @if (request('search'))
-                        <a href="{{ route('nilai-akademik.index') }}"
+                        <a :href="'{{ route('nilai-akademik.index') }}?tab=' + activeTab"
                             class="shrink-0 flex items-center justify-center w-6 h-6 text-slate-400 hover:text-slate-600 transition" title="Reset pencarian">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -221,9 +222,14 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($nilaiEkstrakurikuler as $nilai)
                         <tr class="hover:bg-gray-50/60 transition">
-                            <td class="px-6 py-4 text-slate-700 font-medium">{{ $nilai->siswa->nama ?? '-' }}</td>
+                            <td class="px-6 py-4 font-medium">
+                                <a href="{{ route('nilai-siswa.show', ['siswa' => $nilai->siswa_id, 'semester_id' => $nilai->semester_id]) }}"
+                                    class="text-slate-700 hover:text-indigo-600 transition">
+                                    {{ $nilai->siswa->nama ?? '-' }}
+                                </a>
+                            </td>
                             <td class="px-6 py-4 text-slate-600">{{ $nilai->ekstrakurikuler->nama_ekstrakurikuler ?? '-' }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ $nilai->semester }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $nilai->periode->label ?? $nilai->semester }}</td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono text-xs font-semibold">
                                     {{ $nilai->nilai }}
@@ -282,7 +288,7 @@
                                 <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 100-6 3 3 0 000 6zM12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-12.728l1.414 1.414M16.95 16.95l1.414 1.414" />
                                 </svg>
-                                Belum ada data nilai ekstrakurikuler.
+                                Belum ada data nilai ekstrakurikuler pada semester aktif.
                             </td>
                         </tr>
                         @endforelse

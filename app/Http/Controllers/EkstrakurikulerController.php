@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Ekstrakurikuler;
 use App\Models\NilaiEkstrakurikuler;
+use App\Models\Semester;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EkstrakurikulerController extends Controller
 {
@@ -78,22 +80,18 @@ class EkstrakurikulerController extends Controller
 
     public function nilaiCreate()
     {
-        $siswa = Siswa::orderBy('nama')->get();
-        $ekstrakurikuler = Ekstrakurikuler::orderBy('nama_ekstrakurikuler')->get();
-        $nilai = new NilaiEkstrakurikuler();
-
-        return view('ekstrakurikuler.nilai.create', compact('siswa', 'ekstrakurikuler', 'nilai'));
+        return view('ekstrakurikuler.nilai.create', [
+            'siswa' => Siswa::orderBy('nama')->get(),
+            'ekstrakurikuler' => Ekstrakurikuler::orderBy('nama_ekstrakurikuler')->get(),
+            'semester' => Semester::urutTerbaru()->get(),
+            'nilai' => new NilaiEkstrakurikuler(['semester_id' => Semester::current()?->id]),
+        ]);
     }
 
     public function nilaiStore(Request $request)
     {
-        $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswa,id',
-            'ekstrakurikuler_id' => 'required|exists:ekstrakurikulers,id',
-            'semester' => 'required|in:Ganjil,Genap',
-            'predikat' => 'required|in:Sangat Baik,Baik,Cukup,Kurang',
-            'keterangan' => 'nullable|string|max:255',
-        ]);
+        $validated = $this->validateNilai($request);
+        $validated['semester'] = Semester::findOrFail($validated['semester_id'])->jenis;
 
         NilaiEkstrakurikuler::create($validated);
 
@@ -103,7 +101,7 @@ class EkstrakurikulerController extends Controller
 
     public function nilaiShow(Request $request, NilaiEkstrakurikuler $nilai)
     {
-        $nilai->load('siswa', 'ekstrakurikuler');
+        $nilai->load('siswa', 'ekstrakurikuler', 'periode');
 
         if ($request->ajax() || $request->wantsJson()) {
             return view('ekstrakurikuler.nilai.partials.detail', compact('nilai'));
@@ -114,21 +112,18 @@ class EkstrakurikulerController extends Controller
 
     public function nilaiEdit(NilaiEkstrakurikuler $nilai)
     {
-        $siswa = Siswa::orderBy('nama')->get();
-        $ekstrakurikuler = Ekstrakurikuler::orderBy('nama_ekstrakurikuler')->get();
-
-        return view('ekstrakurikuler.nilai.edit', compact('siswa', 'ekstrakurikuler', 'nilai'));
+        return view('ekstrakurikuler.nilai.edit', [
+            'siswa' => Siswa::orderBy('nama')->get(),
+            'ekstrakurikuler' => Ekstrakurikuler::orderBy('nama_ekstrakurikuler')->get(),
+            'semester' => Semester::urutTerbaru()->get(),
+            'nilai' => $nilai,
+        ]);
     }
 
     public function nilaiUpdate(Request $request, NilaiEkstrakurikuler $nilai)
     {
-        $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswa,id',
-            'ekstrakurikuler_id' => 'required|exists:ekstrakurikulers,id',
-            'semester' => 'required|in:Ganjil,Genap',
-            'predikat' => 'required|in:Sangat Baik,Baik,Cukup,Kurang',
-            'keterangan' => 'nullable|string|max:255',
-        ]);
+        $validated = $this->validateNilai($request, $nilai);
+        $validated['semester'] = Semester::findOrFail($validated['semester_id'])->jenis;
 
         $nilai->update($validated);
 
@@ -149,5 +144,30 @@ class EkstrakurikulerController extends Controller
         $ekstrakurikuler->delete();
 
         return redirect()->route('ekstrakurikuler.index')->with('success', 'Ekstrakurikuler berhasil dihapus.');
+    }
+
+    /**
+     * Validasi nilai ekstrakurikuler. Satu siswa hanya boleh punya satu nilai
+     * per ekstrakurikuler pada satu semester (tahun ajaran + Ganjil/Genap).
+     */
+    private function validateNilai(Request $request, ?NilaiEkstrakurikuler $nilai = null): array
+    {
+        return $request->validate([
+            'siswa_id' => 'required|exists:siswa,id',
+            'ekstrakurikuler_id' => [
+                'required',
+                'exists:ekstrakurikulers,id',
+                Rule::unique('nilai_ekstrakurikulers', 'ekstrakurikuler_id')
+                    ->where('siswa_id', $request->input('siswa_id'))
+                    ->where('semester_id', $request->input('semester_id'))
+                    ->ignore($nilai?->id),
+            ],
+            'semester_id' => 'required|exists:semester,id',
+            'nilai' => 'required|in:A,B,C,D,E',
+            'predikat' => 'required|in:Sangat Baik,Baik,Cukup,Kurang',
+            'keterangan' => 'nullable|string|max:255',
+        ], [
+            'ekstrakurikuler_id.unique' => 'Siswa ini sudah memiliki nilai untuk ekstrakurikuler tersebut pada semester yang dipilih.',
+        ]);
     }
 }

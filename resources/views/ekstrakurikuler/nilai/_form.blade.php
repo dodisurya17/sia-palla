@@ -33,15 +33,31 @@
     </div>
 
     <div>
-        <label for="semester" class="block text-sm font-medium text-slate-700 mb-1.5">Semester</label>
-        <select id="semester" name="semester"
-            class="w-full h-11 px-4 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 outline-none transition @error('semester') border-red-300 @enderror">
+        <label for="semester_id" class="block text-sm font-medium text-slate-700 mb-1.5">Semester / Tahun Ajaran</label>
+        <select id="semester_id" name="semester_id"
+            class="w-full h-11 px-4 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 outline-none transition @error('semester_id') border-red-300 @enderror">
             <option value="">-- Pilih Semester --</option>
-            @foreach (['Ganjil', 'Genap'] as $sem)
-            <option value="{{ $sem }}" {{ old('semester', $nilai->semester) == $sem ? 'selected' : '' }}>{{ $sem }}</option>
+            @foreach ($semester as $s)
+            <option value="{{ $s->id }}" {{ old('semester_id', $nilai->semester_id) == $s->id ? 'selected' : '' }}>
+                {{ $s->label }}@if ($s->status === 'aktif') (Aktif)@endif
+            </option>
             @endforeach
         </select>
-        @error('semester')
+        @error('semester_id')
+        <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
+        <label for="nilai" class="block text-sm font-medium text-slate-700 mb-1.5">Nilai</label>
+        <select id="nilai" name="nilai"
+            class="w-full h-11 px-4 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 outline-none transition @error('nilai') border-red-300 @enderror">
+            <option value="">-- Pilih Nilai --</option>
+            @foreach (['A', 'B', 'C', 'D', 'E'] as $n)
+            <option value="{{ $n }}" {{ old('nilai', $nilai->nilai) == $n ? 'selected' : '' }}>{{ $n }}</option>
+            @endforeach
+        </select>
+        @error('nilai')
         <p class="mt-1.5 text-xs text-red-500">{{ $message }}</p>
         @enderror
     </div>
