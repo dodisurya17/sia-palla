@@ -14,7 +14,6 @@
 
     $formatNilai = fn ($n) => rtrim(rtrim(number_format((float) $n, 2, '.', ''), '0'), '.');
 
-    $iconEye = '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
 @endphp
 
 <x-app-layout>
@@ -49,15 +48,14 @@
                     <template x-if="activeTab === 'akademik'">
                         <div class="flex w-full flex-wrap items-center gap-2 md:w-auto">
                             <a href="{{ route('riwayat-nilai.index') }}"
-                                class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 md:flex-none">
+                                class="inline-flex flex-1 items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white border border-gray-200 text-slate-600 shadow-sm hover:bg-gray-50 hover:border-gray-300 text-sm font-medium md:flex-none">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 Riwayat Nilai
                             </a>
                             @if ($bisaTambahNilai)
                                 <a href="{{ route('nilai-akademik.create') }}"
-                                    class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 md:flex-none">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" /></svg>
-                                    Tambah Nilai
+                                    class="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium flex-1 md:flex-none">
+                                    + Tambah Nilai
                                 </a>
                             @endif
                         </div>
@@ -67,9 +65,8 @@
                     @if ($bisaTambahEkskul)
                         <template x-if="activeTab === 'ekstrakurikuler'">
                             <a href="{{ route('nilai-ekstrakurikuler.create') }}"
-                                class="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 md:w-auto">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" /></svg>
-                                Tambah Nilai Ekstrakurikuler
+                                class="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium w-full md:w-auto">
+                                + Tambah Nilai Ekstrakurikuler
                             </a>
                         </template>
                     @endif
@@ -158,9 +155,9 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end">
-                                            <a href="{{ $profilUrl }}" title="Lihat Profil Nilai"
-                                                class="rounded-lg p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">{!! $iconEye !!}</svg>
+                                            <a href="{{ $profilUrl }}" title="Lihat Nilai"
+                                                class="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-100">
+                                                Lihat Nilai
                                             </a>
                                         </div>
                                     </td>
@@ -278,9 +275,9 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end">
-                                            <a href="{{ $profilEkskulUrl }}" title="Lihat Profil Ekstrakurikuler"
-                                                class="rounded-lg p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">{!! $iconEye !!}</svg>
+                                            <a href="{{ $profilEkskulUrl }}" title="Lihat Nilai"
+                                                class="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-100">
+                                                Lihat Nilai
                                             </a>
                                         </div>
                                     </td>
