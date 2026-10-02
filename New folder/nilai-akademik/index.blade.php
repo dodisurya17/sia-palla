@@ -85,7 +85,7 @@
                     <div class="flex items-center h-11 gap-2 pl-4 pr-2 bg-gray-100 rounded-full overflow-hidden transition focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/30 focus-within:shadow-sm">
 
                         <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Cari nama siswa atau mata pelajaran..."
+                            placeholder="Cari siswa, NISN, kelas, atau mata pelajaran..."
                             class="w-full min-w-0 h-full text-sm bg-transparent border-none outline-none ring-0 focus:ring-0 focus:outline-none placeholder:text-slate-400">
 
                         @if (request('search'))
@@ -107,88 +107,73 @@
                 </form>
             </div>
 
-            {{-- Table Akademik --}}
+            {{-- Table Akademik: 1 siswa = 1 baris --}}
             <div x-show="activeTab === 'akademik'" class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b text-left text-slate-500 uppercase text-xs tracking-wider">
+                            <th class="px-6 py-4 font-medium w-16">No</th>
                             <th class="px-6 py-4 font-medium">Siswa</th>
+                            <th class="px-6 py-4 font-medium">Kelas</th>
                             <th class="px-6 py-4 font-medium">Mata Pelajaran</th>
-                            <th class="px-6 py-4 font-medium">Semester</th>
-                            <th class="px-6 py-4 font-medium">Nilai Tugas</th>
-                            <th class="px-6 py-4 font-medium">Nilai UTS</th>
-                            <th class="px-6 py-4 font-medium">Nilai UAS</th>
-                            <th class="px-6 py-4 font-medium">Nilai Akhir</th>
+                            <th class="px-6 py-4 font-medium">Rata-rata Nilai Akhir</th>
                             <th class="px-6 py-4 font-medium text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse ($nilaiAkademik as $nilai)
+                        @forelse ($nilaiAkademik as $row)
+                        @php
+                        $profilUrl = route('nilai-akademik.siswa', $row->siswa_id);
+                        $rata = (float) $row->rata_rata;
+                        $badgeColor = $rata >= 75
+                        ? 'bg-green-50 text-green-700'
+                        : ($rata >= 60 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700');
+                        $inisial = \Illuminate\Support\Str::upper(collect(explode(' ', trim($row->siswa_nama)))->take(2)->map(fn ($w) => mb_substr($w, 0, 1))->implode(''));
+                        @endphp
                         <tr class="hover:bg-gray-50/60 transition">
-                            <td class="px-6 py-4 font-medium">
-                                <a href="{{ route('nilai-siswa.show', ['siswa' => $nilai->siswa_id, 'semester_id' => $nilai->semester_id]) }}"
-                                    class="text-slate-700 hover:text-indigo-600 transition">
-                                    {{ $nilai->siswa->nama ?? '-' }}
+                            <td class="px-6 py-4 text-slate-400">{{ $nilaiAkademik->firstItem() + $loop->index }}</td>
+                            <td class="px-6 py-4">
+                                <a href="{{ $profilUrl }}" class="flex items-center gap-3 group">
+                                    <span class="w-9 h-9 shrink-0 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold flex items-center justify-center">
+                                        {{ $inisial }}
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block font-medium text-slate-700 group-hover:text-indigo-600 transition truncate">{{ $row->siswa_nama }}</span>
+                                        <span class="block text-xs text-slate-400">NISN {{ $row->siswa_nisn }}</span>
+                                    </span>
                                 </a>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-600 font-mono text-xs font-semibold">
-                                    {{ $nilai->mataPelajaran->kode_mapel ?? '-' }}
+                                @if ($row->kelas_nama)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold">
+                                    {{ $row->kelas_nama }}
                                 </span>
-                                <span class="text-slate-600">{{ $nilai->mataPelajaran->nama_mapel ?? '-' }}</span>
+                                @else
+                                <span class="text-slate-400">-</span>
+                                @endif
                             </td>
-                            <td class="px-6 py-4 text-slate-600">{{ $nilai->periode->label ?? $nilai->semester }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_tugas }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_uts }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ $nilai->nilai_uas }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $row->jumlah_mapel }} mapel</td>
                             <td class="px-6 py-4">
-                                @php
-                                $nilaiAkhir = $nilai->nilai_akhir;
-                                $badgeColor = $nilaiAkhir >= 75
-                                ? 'bg-green-50 text-green-700'
-                                : ($nilaiAkhir >= 60 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700');
-                                @endphp
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $badgeColor }} text-xs font-semibold">
-                                    {{ $nilaiAkhir }}
+                                    {{ rtrim(rtrim(number_format($rata, 2, '.', ''), '0'), '.') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button type="button"
-                                        @click="openShowModal('{{ route('nilai-akademik.show', $nilai) }}')"
+                                    <a href="{{ $profilUrl }}"
                                         class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                                        title="Detail">
+                                        title="Lihat Profil Nilai">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
-                                    </button>
-                                    <a href="{{ route('nilai-akademik.edit', $nilai) }}"
-                                        class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition"
-                                        title="Edit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
                                     </a>
-                                    <button type="button"
-                                        @click="deleteFormId = 'delete-form-{{ $nilai->id }}'; deleteName = '{{ $nilai->siswa->nama ?? 'data ini' }}'"
-                                        class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                        title="Hapus">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                    <form id="delete-form-{{ $nilai->id }}" method="POST"
-                                        action="{{ route('nilai-akademik.destroy', $nilai) }}" class="hidden">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-16 text-center text-slate-400">
+                            <td colspan="6" class="px-6 py-16 text-center text-slate-400">
                                 <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>

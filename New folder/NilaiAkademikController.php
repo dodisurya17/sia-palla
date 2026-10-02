@@ -9,6 +9,7 @@ use App\Models\NilaiEkstrakurikuler;
 use App\Models\Semester;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NilaiAkademikController extends Controller
 {
@@ -19,28 +20,39 @@ class NilaiAkademikController extends Controller
 
         $semesterAktif = Semester::current();
 
-        $query = NilaiAkademik::with(['siswa', 'mataPelajaran', 'guru', 'periode'])
-            ->where('semester_id', $semesterAktif?->id ?? 0);
-
-        if ($user->isGuru()) {
-            $query->where('guru_id', $user->guru_id);
-        } elseif ($user->isOrangTua()) {
-            $anakIds = $user->orangTua->siswa()->pluck('id');
-            $query->whereIn('siswa_id', $anakIds);
-        }
-
-        $nilaiAkademik = $query
-            ->when($search, function ($query, $search) {
+        // Tampilan utama: 1 siswa = 1 baris (nilai per mapel diringkas, rinciannya ada di Profil Nilai Siswa).
+        // visibleTo() sudah membatasi data: guru hanya nilai miliknya, orang tua hanya nilai anaknya.
+        $nilaiAkademik = NilaiAkademik::query()
+            ->visibleTo($user)
+            ->join('siswa', 'siswa.id', '=', 'nilai_akademik.siswa_id')
+            ->leftJoin('kelas', 'kelas.id', '=', 'siswa.kelas_id')
+            ->where('nilai_akademik.semester_id', $semesterAktif?->id ?? 0)
+            ->when($search, function ($query, $search) use ($semesterAktif) {
                 // Dibungkus satu grup agar OR tidak melepas filter semester & role.
-                $query->where(function ($group) use ($search) {
-                    $group->whereHas('siswa', function ($q) use ($search) {
-                        $q->where('nama', 'like', "%{$search}%");
-                    })->orWhereHas('mataPelajaran', function ($q) use ($search) {
-                        $q->where('nama_mapel', 'like', "%{$search}%");
-                    });
+                $query->where(function ($group) use ($search, $semesterAktif) {
+                    $group->where('siswa.nama', 'like', "%{$search}%")
+                        ->orWhere('siswa.nisn', 'like', "%{$search}%")
+                        ->orWhere('kelas.nama_kelas', 'like', "%{$search}%")
+                        // Siswa yang punya nilai pada mata pelajaran yang dicari.
+                        ->orWhereIn('nilai_akademik.siswa_id', function ($sub) use ($search, $semesterAktif) {
+                            $sub->select('na.siswa_id')
+                                ->from('nilai_akademik as na')
+                                ->join('mata_pelajaran as mp', 'mp.id', '=', 'na.mata_pelajaran_id')
+                                ->where('na.semester_id', $semesterAktif?->id ?? 0)
+                                ->where('mp.nama_mapel', 'like', "%{$search}%");
+                        });
                 });
             })
-            ->latest()
+            ->select(
+                'nilai_akademik.siswa_id',
+                'siswa.nama as siswa_nama',
+                'siswa.nisn as siswa_nisn',
+                'kelas.nama_kelas as kelas_nama',
+                DB::raw('COUNT(nilai_akademik.id) as jumlah_mapel'),
+                DB::raw('ROUND(AVG(nilai_akademik.nilai_akhir), 2) as rata_rata')
+            )
+            ->groupBy('nilai_akademik.siswa_id', 'siswa.nama', 'siswa.nisn', 'kelas.nama_kelas')
+            ->orderBy('siswa.nama')
             ->paginate(10, ['*'], 'page_akademik')
             ->withQueryString();
 
@@ -91,6 +103,49 @@ class NilaiAkademikController extends Controller
 
         return redirect()->route('nilai-akademik.index')
             ->with('success', 'Data nilai akademik berhasil ditambahkan.');
+    }
+
+    /**
+     * Profil Nilai Siswa: seluruh nilai mata pelajaran satu siswa pada semester aktif.
+     * Semester sebelumnya dilihat lewat menu Riwayat Nilai.
+     */
+    public function siswa(Siswa $siswa)
+    {
+        $user = auth()->user();
+        $semesterAktif = Semester::current();
+
+        if ($user->isOrangTua() && !$user->orangTua->siswa()->where('id', $siswa->id)->exists()) {
+            abort(403);
+        }
+
+        // visibleTo(): guru hanya melihat nilai yang ia input sendiri.
+        $nilaiList = NilaiAkademik::with(['mataPelajaran', 'guru'])
+            ->visibleTo($user)
+            ->where('siswa_id', $siswa->id)
+            ->where('semester_id', $semesterAktif?->id ?? 0)
+            ->get()
+            ->sortBy(fn ($n) => $n->mataPelajaran->nama_mapel ?? '')
+            ->values();
+
+        if ($user->isGuru() && $nilaiList->isEmpty()) {
+            abort(403);
+        }
+
+        $tertinggi = $nilaiList->sortByDesc('nilai_akhir')->first();
+        $terendah = $nilaiList->sortBy('nilai_akhir')->first();
+
+        $ringkasan = [
+            'jumlah' => $nilaiList->count(),
+            'rata_rata' => $nilaiList->isNotEmpty() ? round($nilaiList->avg('nilai_akhir'), 2) : null,
+            'tertinggi' => $tertinggi,
+            'terendah' => $terendah,
+        ];
+
+        $kelasNama = $siswa->kelas_id
+            ? DB::table('kelas')->where('id', $siswa->kelas_id)->value('nama_kelas')
+            : null;
+
+        return view('nilai-akademik.siswa', compact('siswa', 'kelasNama', 'nilaiList', 'ringkasan', 'semesterAktif'));
     }
 
     public function show(Request $request, NilaiAkademik $nilai_akademik)
