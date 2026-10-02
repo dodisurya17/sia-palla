@@ -53,6 +53,9 @@ Route::middleware(['auth'])->group(function () {
         // Profil Nilai Siswa (semester aktif): 1 siswa, seluruh nilai mata pelajaran. Discope di controller.
         Route::get('/nilai-akademik/siswa/{siswa}', [NilaiAkademikController::class, 'siswa'])->name('nilai-akademik.siswa');
 
+        // Profil Ekstrakurikuler Siswa (semester aktif): 1 siswa, seluruh nilai ekstrakurikuler. Discope di controller.
+        Route::get('/nilai-akademik/siswa/{siswa}/ekstrakurikuler', [NilaiAkademikController::class, 'siswaEkskul'])->name('nilai-akademik.siswa-ekskul');
+
         // Cetak rapor: pilih siswa -> pilih semester -> preview -> cetak / PDF (discope di controller).
         Route::get('/cetak-rapor', [CetakRaporController::class, 'index'])->name('cetak-rapor.index');
         Route::get('/cetak-rapor/cetak', [CetakRaporController::class, 'cetak'])->name('cetak-rapor.print');

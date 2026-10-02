@@ -61,9 +61,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cetak-rapor/cetak', [CetakRaporController::class, 'cetak'])->name('cetak-rapor.print');
     });
 
-    // Admin + guru: input & lihat nilai
+    // Admin + guru: input nilai. index & show dikecualikan karena sudah didaftarkan
+    // untuk admin, guru, dan orang tua di grup bawah (jika tidak, orang tua kena 403).
     Route::middleware(['role:admin,guru'])->group(function () {
-        Route::resource('nilai-akademik', NilaiAkademikController::class)->parameters(['nilai-akademik' => 'nilai_akademik']);
+        Route::resource('nilai-akademik', NilaiAkademikController::class)
+            ->except(['index', 'show'])
+            ->parameters(['nilai-akademik' => 'nilai_akademik']);
     });
 
     // Admin, guru, orang tua: lihat nilai (masing-masing sudah discope di controller)
