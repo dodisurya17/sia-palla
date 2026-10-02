@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GuruController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search  = $request->input('search');
+        $mapelId = $request->input('mata_pelajaran_id');
+        $kelasId = $request->input('kelas_id');
 
         $gurus = Guru::with('mataPelajaran')
             ->when($search, function ($query, $search) {
@@ -19,11 +22,37 @@ class GuruController extends Controller
                         ->orWhere('nip', 'like', "%{$search}%");
                 });
             })
+            // Filter mata pelajaran
+            ->when($mapelId, fn ($query, $id) => $query->where('mata_pelajaran_id', $id))
+            // Filter kelas: guru yang pernah/sedang mengajar siswa di kelas tsb (via nilai_akademik)
+            ->when($kelasId, function ($query, $id) {
+                $query->whereIn('id', function ($sub) use ($id) {
+                    $sub->select('nilai_akademik.guru_id')
+                        ->from('nilai_akademik')
+                        ->join('siswa', 'siswa.id', '=', 'nilai_akademik.siswa_id')
+                        ->where('siswa.kelas_id', $id)
+                        ->whereNotNull('nilai_akademik.guru_id');
+                });
+            })
             ->orderBy('nama')
             ->paginate(10)
             ->withQueryString();
 
-        return view('guru.index', compact('gurus'));
+        $mataPelajarans = MataPelajaran::orderBy('nama_mapel')->get(['id', 'nama_mapel']);
+        $kelasList      = DB::table('kelas')->orderBy('nama_kelas')->get(['id', 'nama_kelas']);
+
+        // Judul hasil filter, contoh: "Guru Bahasa Indonesia - X AKA"
+        $namaMapel = $mapelId ? $mataPelajarans->firstWhere('id', (int) $mapelId)?->nama_mapel : null;
+        $namaKelas = $kelasId ? $kelasList->firstWhere('id', (int) $kelasId)?->nama_kelas : null;
+
+        $judulFilter = null;
+        if ($namaMapel || $namaKelas) {
+            $judulFilter = 'Guru ' . collect([$namaMapel, $namaKelas])->filter()->implode(' - ');
+        }
+
+        return view('guru.index', compact(
+            'gurus', 'mataPelajarans', 'kelasList', 'judulFilter'
+        ));
     }
 
     public function create()

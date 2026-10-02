@@ -1,69 +1,132 @@
 <x-app-layout :title="'Data Guru'">
     <div class="bg-white border rounded-lg" x-data="{ deleteModal: false, deleteFormId: null, deleteName: '' }">
-        <div class="flex items-center justify-between p-5 border-b">
-            <form method="GET" action="{{ route('guru.index') }}" class="flex-1 max-w-xs" id="searchForm">
-                <div style="position: relative; display: flex; align-items: center; background: #fff; border: 1px solid #e5e7eb; border-radius: 999px; height: 44px; padding: 0 4px 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-                    <input
-                        type="text"
-                        id="searchInput"
-                        name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Cari nama / NIP..."
-                        autocomplete="off"
-                        style="flex: 1; border: none; outline: none; background: transparent; font-size: 14px; height: 100%;" />
+        {{-- Toolbar: pencarian + filter (otomatis terapkan saat pilihan berubah) --}}
+        @php
+            $hasFilter = request()->filled('search') || request()->filled('mata_pelajaran_id') || request()->filled('kelas_id');
+            $selectStyle = 'appearance: none; -webkit-appearance: none; width: 100%; height: 44px; padding: 0 36px 0 16px; background: #fff url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%239ca3af\' stroke-width=\'2\'%3e%3cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M19 9l-7 7-7-7\'/%3e%3c/svg%3e") no-repeat right 12px center / 16px; border: 1px solid #e5e7eb; border-radius: 999px; font-size: 14px; color: #374151; box-shadow: 0 1px 2px rgba(0,0,0,0.04); cursor: pointer;';
+        @endphp
 
-                    <button
-                        type="button"
-                        id="clearBtn"
-                        aria-label="Hapus pencarian"
-                        class="{{ request('search') ? '' : 'hidden' }}"
-                        style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: transparent; color: #9ca3af; cursor: pointer; border-radius: 50%;"
-                        onclick="clearSearchInput()">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+        <div class="p-5 border-b">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+                <form method="GET" action="{{ route('guru.index') }}" id="filterForm"
+                    class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-center">
 
-                    <div style="width: 1px; height: 20px; background: #e5e7eb; margin: 0 6px;"></div>
+                    {{-- Cari nama / NIP --}}
+                    <div style="position: relative; display: flex; align-items: center; background: #fff; border: 1px solid #e5e7eb; border-radius: 999px; height: 44px; padding: 0 4px 0 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                        <input
+                            type="text"
+                            id="searchInput"
+                            name="search"
+                            value="{{ request('search') }}"
+                            placeholder="Cari nama / NIP..."
+                            autocomplete="off"
+                            style="flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 14px; height: 100%;" />
 
-                    <button
-                        type="submit"
-                        aria-label="Cari"
-                        style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; color: #374151; cursor: pointer; border-radius: 50%;">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
-                        </svg>
-                    </button>
-                </div>
-            </form>
+                        <button
+                            type="button"
+                            id="clearBtn"
+                            aria-label="Hapus pencarian"
+                            class="{{ request('search') ? '' : 'hidden' }}"
+                            style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: transparent; color: #9ca3af; cursor: pointer; border-radius: 50%;"
+                            onclick="clearSearchInput()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <div style="width: 1px; height: 20px; background: #e5e7eb; margin: 0 6px;"></div>
+
+                        <button
+                            type="submit"
+                            aria-label="Cari"
+                            style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; color: #374151; cursor: pointer; border-radius: 50%;">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Filter Mata Pelajaran --}}
+                    <select name="mata_pelajaran_id" aria-label="Filter mata pelajaran"
+                        class="js-auto-submit" style="{{ $selectStyle }}">
+                        <option value="">Semua Mata Pelajaran</option>
+                        @foreach ($mataPelajarans as $mapel)
+                            <option value="{{ $mapel->id }}" @selected((string) request('mata_pelajaran_id') === (string) $mapel->id)>
+                                {{ $mapel->nama_mapel }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    {{-- Filter Kelas --}}
+                    <select name="kelas_id" aria-label="Filter kelas"
+                        class="js-auto-submit" style="{{ $selectStyle }}">
+                        <option value="">Semua Kelas</option>
+                        @foreach ($kelasList as $kelas)
+                            <option value="{{ $kelas->id }}" @selected((string) request('kelas_id') === (string) $kelas->id)>
+                                {{ $kelas->nama_kelas }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    {{-- Reset --}}
+                    @if ($hasFilter)
+                        <a href="{{ route('guru.index') }}"
+                            class="inline-flex items-center justify-center gap-1 h-11 px-4 rounded-full border border-gray-200 bg-white text-gray-600 text-sm font-medium hover:bg-gray-50 transition whitespace-nowrap">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Reset
+                        </a>
+                    @endif
+                </form>
+
+                <a href="{{ route('guru.create') }}"
+                    class="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium whitespace-nowrap">
+                    + Tambah Guru
+                </a>
+            </div>
 
             <script>
-                const searchInput = document.getElementById('searchInput');
-                const clearBtn = document.getElementById('clearBtn');
-                const searchForm = document.getElementById('searchForm');
+                (function () {
+                    const form = document.getElementById('filterForm');
+                    const searchInput = document.getElementById('searchInput');
+                    const clearBtn = document.getElementById('clearBtn');
 
-                function toggleClear() {
-                    clearBtn.classList.toggle('hidden', searchInput.value.length === 0);
-                }
+                    // Filter langsung bekerja ketika pilihan berubah (tanpa tombol Cari)
+                    form.querySelectorAll('.js-auto-submit').forEach(function (el) {
+                        el.addEventListener('change', function () { form.submit(); });
+                    });
 
-                searchInput.addEventListener('input', toggleClear);
+                    searchInput.addEventListener('input', function () {
+                        clearBtn.classList.toggle('hidden', searchInput.value.length === 0);
+                    });
 
-                function clearSearchInput() {
-                    searchInput.value = '';
-                    toggleClear();
-                    searchForm.submit();
-                }
+                    window.clearSearchInput = function () {
+                        searchInput.value = '';
+                        form.submit();
+                    };
+                })();
             </script>
 
-            <a href="{{ route('guru.create') }}"
-                class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-200 text-sm font-medium">
-                + Tambah Guru
-            </a>
+            {{-- Ringkasan hasil filter --}}
+            @if ($judulFilter)
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8v6l-4 2v-8L3 4z" />
+                        </svg>
+                        {{ $judulFilter }}
+                    </span>
+                    <span class="text-sm text-slate-500">{{ $gurus->total() }} guru ditemukan</span>
+                </div>
+            @endif
         </div>
 
+        <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-left text-gray-500">
                 <tr>
+                    <th class="px-5 py-3 w-14">No</th>
                     <th class="px-5 py-3">NIP</th>
                     <th class="px-5 py-3">Nama</th>
                     <th class="px-5 py-3">No. HP</th>
@@ -73,7 +136,8 @@
             </thead>
             <tbody class="divide-y">
                 @forelse ($gurus as $guru)
-                <tr>
+                <tr class="hover:bg-gray-50/60 transition-colors">
+                    <td class="px-5 py-3 text-gray-400">{{ $gurus->firstItem() + $loop->index }}</td>
                     <td class="px-5 py-3">{{ $guru->nip }}</td>
                     <td class="px-5 py-3">{{ $guru->nama }}</td>
                     <td class="px-5 py-3">{{ $guru->no_hp ?? '-' }}</td>
@@ -116,11 +180,25 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-5 py-6 text-center text-gray-400">Belum ada data guru.</td>
+                    <td colspan="6" class="px-5 py-10 text-center">
+                        <div class="mx-auto w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+                            </svg>
+                        </div>
+                        @if ($hasFilter)
+                            <p class="text-sm font-medium text-slate-600">Tidak ada guru yang cocok dengan filter.</p>
+                            <p class="text-xs text-slate-400 mt-1">Coba ubah mata pelajaran / kelas, atau
+                                <a href="{{ route('guru.index') }}" class="text-indigo-600 hover:underline">reset filter</a>.</p>
+                        @else
+                            <p class="text-sm text-gray-400">Belum ada data guru.</p>
+                        @endif
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+        </div>
 
         <div class="p-4">
             {{ $gurus->links() }}
