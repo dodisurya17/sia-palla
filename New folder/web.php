@@ -7,6 +7,7 @@ use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\EkstrakurikulerController;
 use App\Http\Controllers\NilaiAkademikController;
 use App\Http\Controllers\OrangTuaController;
+use App\Http\Controllers\RiwayatNilaiController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,13 @@ Route::middleware(['auth'])->group(function () {
         });
         Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
         Route::post('/guru/{guru}/buat-akun', [GuruController::class, 'buatAkun'])->name('guru.buat-akun');
+    });
+
+    // Admin, guru, orang tua: riwayat nilai & profil nilai siswa (discope di controller).
+    // Didaftarkan sebelum resource nilai-akademik supaya tidak tertimpa wildcard.
+    Route::middleware(['role:admin,guru,orang_tua'])->group(function () {
+        Route::get('/riwayat-nilai', [RiwayatNilaiController::class, 'index'])->name('riwayat-nilai.index');
+        Route::get('/nilai-siswa/{siswa}', [RiwayatNilaiController::class, 'siswa'])->name('nilai-siswa.show');
     });
 
     // Admin + guru: input & lihat nilai

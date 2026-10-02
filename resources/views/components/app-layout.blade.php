@@ -112,6 +112,12 @@
                 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
                 'roles' => ['admin', 'guru', 'orang_tua'],
                 ],
+                [
+                'route' => 'cetak-rapor.index',
+                'label' => 'Cetak Rapor',
+                'icon' => 'M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z',
+                'roles' => ['admin', 'guru', 'orang_tua'],
+                ],
                 ];
 
                 $menus = array_filter($menus, fn ($menu) => in_array($userRole, $menu['roles']));

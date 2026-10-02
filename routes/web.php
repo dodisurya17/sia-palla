@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CetakRaporController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KelasController;
@@ -48,6 +49,10 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,guru,orang_tua'])->group(function () {
         Route::get('/riwayat-nilai', [RiwayatNilaiController::class, 'index'])->name('riwayat-nilai.index');
         Route::get('/nilai-siswa/{siswa}', [RiwayatNilaiController::class, 'siswa'])->name('nilai-siswa.show');
+
+        // Cetak rapor: pilih siswa -> pilih semester -> preview -> cetak / PDF (discope di controller).
+        Route::get('/cetak-rapor', [CetakRaporController::class, 'index'])->name('cetak-rapor.index');
+        Route::get('/cetak-rapor/cetak', [CetakRaporController::class, 'cetak'])->name('cetak-rapor.print');
     });
 
     // Admin + guru: input & lihat nilai
