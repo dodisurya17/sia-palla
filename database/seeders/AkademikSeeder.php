@@ -46,14 +46,14 @@ class AkademikSeeder extends Seeder
         ]);
 
         OrangTua::insert([
-            ['nama' => 'Bapak Agus Setiawan', 'no_hp' => '081234567890', 'alamat' => 'Jl. Mawar No. 1, Jakarta', 'pekerjaan' => 'Wiraswasta', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Ibu Sri Wahyuni', 'no_hp' => '081298765432', 'alamat' => 'Jl. Melati No. 5, Jakarta', 'pekerjaan' => 'PNS', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Bapak Dedi Kurniawan', 'no_hp' => '082112345678', 'alamat' => 'Jl. Anggrek No. 12, Bekasi', 'pekerjaan' => 'Karyawan Swasta', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Ibu Rina Marlina', 'no_hp' => '085611223344', 'alamat' => 'Jl. Kenanga No. 8, Depok', 'pekerjaan' => 'Guru', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Bapak Hendra Gunawan', 'no_hp' => '087755667788', 'alamat' => 'Jl. Dahlia No. 3, Tangerang', 'pekerjaan' => 'Dokter', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Ibu Fitriani', 'no_hp' => '089933445566', 'alamat' => 'Jl. Flamboyan No. 7, Bogor', 'pekerjaan' => 'Ibu Rumah Tangga', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Bapak Joko Santoso', 'no_hp' => '081277889900', 'alamat' => 'Jl. Cempaka No. 15, Jakarta', 'pekerjaan' => 'Pedagang', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Ibu Ani Suryani', 'no_hp' => '085566778899', 'alamat' => 'Jl. Teratai No. 2, Bekasi', 'pekerjaan' => 'Wiraswasta', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Agus Setiawan', 'no_hp' => '081234567890', 'alamat' => 'Jl. Mawar No. 1, Jakarta', 'pekerjaan' => 'Wiraswasta', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Sri Wahyuni', 'no_hp' => '081298765432', 'alamat' => 'Jl. Melati No. 5, Jakarta', 'pekerjaan' => 'PNS', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Dedi Kurniawan', 'no_hp' => '082112345678', 'alamat' => 'Jl. Anggrek No. 12, Bekasi', 'pekerjaan' => 'Karyawan Swasta', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Rina Marlina', 'no_hp' => '085611223344', 'alamat' => 'Jl. Kenanga No. 8, Depok', 'pekerjaan' => 'Guru', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Hendra Gunawan', 'no_hp' => '087755667788', 'alamat' => 'Jl. Dahlia No. 3, Tangerang', 'pekerjaan' => 'Dokter', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Fitriani', 'no_hp' => '089933445566', 'alamat' => 'Jl. Flamboyan No. 7, Bogor', 'pekerjaan' => 'Ibu Rumah Tangga', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Joko Santoso', 'no_hp' => '081277889900', 'alamat' => 'Jl. Cempaka No. 15, Jakarta', 'pekerjaan' => 'Pedagang', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Ani Suryani', 'no_hp' => '085566778899', 'alamat' => 'Jl. Teratai No. 2, Bekasi', 'pekerjaan' => 'Wiraswasta', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }
