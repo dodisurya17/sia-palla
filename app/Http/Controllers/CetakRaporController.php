@@ -6,9 +6,27 @@ use App\Models\Siswa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CetakRaporController extends Controller
 {
+    /**
+     * Urutan mata pelajaran di rapor (berdasarkan kode_mapel).
+     * Mapel di luar daftar ini ditaruh setelahnya, urut nama.
+     */
+    private const URUTAN_MAPEL = [
+        'PAK', // Pendidikan Agama Katolik
+        'PKN', // Pendidikan Kewarganegaraan
+        'BIN', // Bahasa Indonesia
+        'MTK', // Matematika
+        'IPA', // Ilmu Pengetahuan Alam
+        'IPS', // Ilmu Pengetahuan Sosial
+        'BIG', // Bahasa Inggris
+        'PJK', // Penjaskes
+        'SBD', // Seni Budaya
+        'INF', // Informatika
+    ];
+
     /**
      * Halaman utama: pilih siswa -> pilih semester -> preview rapor.
      */
@@ -115,6 +133,8 @@ class CetakRaporController extends Controller
         $semester = DB::table('semester')->where('id', $semesterId)->first();
         abort_if(!$semester, 404);
 
+        $urutan = array_flip(self::URUTAN_MAPEL);
+
         // Bila ada duplikat nilai untuk mapel yang sama, ambil yang terakhir diinput.
         $nilai = DB::table('nilai_akademik as n')
             ->join('mata_pelajaran as m', 'm.id', '=', 'n.mata_pelajaran_id')
@@ -126,20 +146,33 @@ class CetakRaporController extends Controller
                 'n.nilai_tugas', 'n.nilai_uts', 'n.nilai_uas', 'n.nilai_akhir',
             ])
             ->keyBy('mata_pelajaran_id')
-            ->sortBy('nama_mapel', SORT_NATURAL | SORT_FLAG_CASE)
+            ->sort(function ($a, $b) use ($urutan) {
+                $pa = $urutan[strtoupper((string) $a->kode_mapel)] ?? 999;
+                $pb = $urutan[strtoupper((string) $b->kode_mapel)] ?? 999;
+
+                return $pa <=> $pb ?: strnatcasecmp($a->nama_mapel, $b->nama_mapel);
+            })
             ->values();
 
-        $rows = $nilai->map(fn ($n, $i) => [
-            'no'     => $i + 1,
-            'kode'   => $n->kode_mapel,
-            'nama'   => $n->nama_mapel,
-            'kkm'    => (int) $n->kkm,
-            'tugas'  => $this->fmt($n->nilai_tugas),
-            'uts'    => $this->fmt($n->nilai_uts),
-            'uas'    => $this->fmt($n->nilai_uas),
-            'akhir'  => $this->fmt($n->nilai_akhir),
-            'tuntas' => (float) $n->nilai_akhir >= (int) $n->kkm,
-        ])->all();
+        $namaSiswa = Str::title(Str::lower($siswa->nama));
+
+        $rows = $nilai->map(function ($n, $i) use ($namaSiswa) {
+            [$paham, $bimbingan] = $this->capaian($namaSiswa, $n);
+
+            return [
+                'no'         => $i + 1,
+                'kode'       => $n->kode_mapel,
+                'nama'       => $n->nama_mapel,
+                'kkm'        => (int) $n->kkm,
+                'tugas'      => $this->fmt($n->nilai_tugas),
+                'uts'        => $this->fmt($n->nilai_uts),
+                'uas'        => $this->fmt($n->nilai_uas),
+                'akhir'      => $this->fmt($n->nilai_akhir),
+                'tuntas'     => (float) $n->nilai_akhir >= (int) $n->kkm,
+                'paham'      => $paham,
+                'bimbingan'  => $bimbingan,
+            ];
+        })->all();
 
         $jumlahNilai = (float) $nilai->sum('nilai_akhir');
         $rataRata    = $nilai->isNotEmpty() ? $jumlahNilai / $nilai->count() : 0;
@@ -149,8 +182,12 @@ class CetakRaporController extends Controller
             ->join('ekstrakurikulers as e', 'e.id', '=', 'ne.ekstrakurikuler_id')
             ->where('ne.siswa_id', $siswa->id)
             ->where('ne.semester_id', $semester->id)
-            ->orderBy('e.nama_ekstrakurikuler')
-            ->get(['e.nama_ekstrakurikuler as nama', 'ne.nilai', 'ne.predikat', 'ne.keterangan'])
+            ->orderBy('ne.id')
+            ->get(['ne.ekstrakurikuler_id', 'e.nama_ekstrakurikuler as nama', 'ne.nilai', 'ne.predikat', 'ne.keterangan'])
+            // Bila satu ekskul punya lebih dari satu nilai di semester yang sama, ambil yang terakhir diinput.
+            ->keyBy('ekstrakurikuler_id')
+            ->sortBy('nama', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
             ->map(fn ($e) => (array) $e)
             ->all();
 
@@ -163,6 +200,9 @@ class CetakRaporController extends Controller
             : null;
 
         $ttl = trim(implode(', ', array_filter([$siswa->tempat_lahir, $tanggalLahir])));
+
+        // Semester genap (II) -> rapor memuat kotak keputusan kenaikan kelas.
+        $genap = (bool) preg_match('/genap|^ii$|^2$/i', trim((string) $semester->jenis));
 
         return [
             'kosong'  => count($rows) === 0,
@@ -185,12 +225,14 @@ class CetakRaporController extends Controller
             'kelas' => [
                 'nama'       => $siswa->kelas?->nama_kelas,
                 'tingkat'    => $siswa->kelas?->tingkat,
+                'fase'       => $this->fase($siswa->kelas?->tingkat ?? $siswa->kelas?->nama_kelas),
                 'wali_kelas' => $siswa->kelas?->wali_kelas,
             ],
             'semester' => [
                 'id'           => $semester->id,
                 'tahun_ajaran' => $semester->tahun_ajaran,
                 'jenis'        => $semester->jenis,
+                'genap'        => $genap,
             ],
             'nilai'     => $rows,
             'ringkasan' => [
@@ -203,6 +245,74 @@ class CetakRaporController extends Controller
             'ekskul'        => $ekskul,
             'tanggal_cetak' => Carbon::now()->locale('id')->translatedFormat('d F Y'),
         ];
+    }
+
+    /**
+     * Susun kalimat capaian kompetensi dari nilai komponen (Tugas, UTS, UAS) terhadap KKM.
+     * Mengembalikan [kalimat pemahaman, kalimat bimbingan].
+     */
+    private function capaian(string $nama, object $n): array
+    {
+        $kkm   = (int) $n->kkm;
+        $mapel = $n->nama_mapel;
+
+        $komponen = array_filter([
+            'Tugas' => $n->nilai_tugas,
+            'UTS'   => $n->nilai_uts,
+            'UAS'   => $n->nilai_uas,
+        ], fn ($v) => !is_null($v));
+
+        $atas  = array_keys(array_filter($komponen, fn ($v) => (float) $v >= $kkm));
+        $bawah = array_keys(array_filter($komponen, fn ($v) => (float) $v < $kkm));
+
+        if ((float) $n->nilai_akhir >= $kkm) {
+            $paham = "{$nama} menunjukkan pemahaman dalam seluruh capaian pembelajaran {$mapel}.";
+        } elseif ($atas) {
+            $paham = "{$nama} menunjukkan pemahaman dalam {$mapel} pada komponen " . $this->gabung($atas) . '.';
+        } else {
+            $paham = "{$nama} belum menunjukkan pemahaman yang memadai dalam {$mapel}.";
+        }
+
+        $bimbingan = $bawah
+            ? "{$nama} membutuhkan bimbingan dalam {$mapel} pada komponen " . $this->gabung($bawah) . '.'
+            : "{$nama} tidak membutuhkan bimbingan khusus dalam {$mapel}.";
+
+        return [$paham, $bimbingan];
+    }
+
+    /** ['Tugas','UTS','UAS'] -> "Tugas, UTS dan UAS" */
+    private function gabung(array $items): string
+    {
+        if (count($items) <= 1) {
+            return (string) ($items[0] ?? '');
+        }
+
+        $last = array_pop($items);
+
+        return implode(', ', $items) . ' dan ' . $last;
+    }
+
+    /** Fase Kurikulum Merdeka dari tingkat kelas (angka atau romawi): 7-9 -> D, 10 -> E, 11-12 -> F. */
+    private function fase(?string $tingkat): string
+    {
+        if (!$tingkat || !preg_match('/^\s*(\d+|[IVX]+)/i', $tingkat, $m)) {
+            return '-';
+        }
+
+        $romawi = ['I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4, 'V' => 5, 'VI' => 6,
+                   'VII' => 7, 'VIII' => 8, 'IX' => 9, 'X' => 10, 'XI' => 11, 'XII' => 12];
+
+        $angka = ctype_digit($m[1]) ? (int) $m[1] : ($romawi[strtoupper($m[1])] ?? 0);
+
+        return match (true) {
+            $angka >= 1 && $angka <= 2   => 'A',
+            $angka >= 3 && $angka <= 4   => 'B',
+            $angka >= 5 && $angka <= 6   => 'C',
+            $angka >= 7 && $angka <= 9   => 'D',
+            $angka === 10                => 'E',
+            $angka >= 11 && $angka <= 12 => 'F',
+            default                      => '-',
+        };
     }
 
     /** 85.00 -> "85", 82.50 -> "82,5", 78.25 -> "78,25" */

@@ -24,17 +24,18 @@ class AkademikSeeder extends Seeder
             ['nama_kelas' => 'IX C', 'tingkat' => 'IX', 'wali_kelas' => 'Bpk. Budi', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
+        // Mata pelajaran sesuai rapor sekolah (urutan = urutan di rapor).
         MataPelajaran::insert([
-            ['kode_mapel' => 'MTK', 'nama_mapel' => 'Matematika', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'PAK', 'nama_mapel' => 'Pendidikan Agama Katolik', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'PKN', 'nama_mapel' => 'Pendidikan Kewarganegaraan', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'BIN', 'nama_mapel' => 'Bahasa Indonesia', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'BIG', 'nama_mapel' => 'Bahasa Inggris', 'kkm' => 72, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'MTK', 'nama_mapel' => 'Matematika', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'IPA', 'nama_mapel' => 'Ilmu Pengetahuan Alam', 'kkm' => 72, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'IPS', 'nama_mapel' => 'Ilmu Pengetahuan Sosial', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'PKN', 'nama_mapel' => 'Pendidikan Kewarganegaraan', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'PAI', 'nama_mapel' => 'Pendidikan Agama Islam', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'PJK', 'nama_mapel' => 'Pendidikan Jasmani', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'BIG', 'nama_mapel' => 'Bahasa Inggris', 'kkm' => 72, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'PJK', 'nama_mapel' => 'Penjaskes', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
             ['kode_mapel' => 'SBD', 'nama_mapel' => 'Seni Budaya', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
-            ['kode_mapel' => 'PKY', 'nama_mapel' => 'Prakarya', 'kkm' => 78, 'created_at' => now(), 'updated_at' => now()],
+            ['kode_mapel' => 'INF', 'nama_mapel' => 'Informatika', 'kkm' => 75, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         Ekstrakurikuler::insert([
