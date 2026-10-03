@@ -7,6 +7,7 @@ use App\Models\MataPelajaran;
 use App\Models\NilaiAkademik;
 use App\Models\Siswa;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class NilaiAkademikSeeder extends Seeder
 {
@@ -15,9 +16,16 @@ class NilaiAkademikSeeder extends Seeder
         $siswa = Siswa::all();
         $mataPelajaran = MataPelajaran::all();
         $guru = Guru::all();
+        $semesters = DB::table('semester')->orderBy('id')->get();
 
         if ($siswa->isEmpty() || $mataPelajaran->isEmpty() || $guru->isEmpty()) {
             $this->command?->warn('Siswa, Mata Pelajaran, atau Guru belum ada. Jalankan seeder terkait terlebih dahulu.');
+
+            return;
+        }
+
+        if ($semesters->isEmpty()) {
+            $this->command?->warn('Tabel semester masih kosong, nilai akademik tidak dibuat. Isi data semester terlebih dahulu.');
 
             return;
         }
@@ -26,7 +34,6 @@ class NilaiAkademikSeeder extends Seeder
         // supaya nilai dicatat oleh guru yang relevan dengan mapelnya.
         $guruByMapel = $guru->groupBy('mata_pelajaran_id');
 
-        $semesterList = ['Ganjil', 'Genap'];
         $rows = [];
 
         foreach ($siswa as $s) {
@@ -36,7 +43,7 @@ class NilaiAkademikSeeder extends Seeder
                     ? $guruMapel->random()
                     : $guru->random();
 
-                foreach ($semesterList as $semester) {
+                foreach ($semesters as $semester) {
                     $tugas = rand(65, 100);
                     $uts = rand(60, 100);
                     $uas = rand(60, 100);
@@ -46,7 +53,8 @@ class NilaiAkademikSeeder extends Seeder
                         'siswa_id' => $s->id,
                         'mata_pelajaran_id' => $mapel->id,
                         'guru_id' => $guruTerpilih->id,
-                        'semester' => $semester,
+                        'semester' => $semester->jenis, // kolom lama (wajib diisi), Ganjil/Genap
+                        'semester_id' => $semester->id,
                         'nilai_tugas' => $tugas,
                         'nilai_uts' => $uts,
                         'nilai_uas' => $uas,

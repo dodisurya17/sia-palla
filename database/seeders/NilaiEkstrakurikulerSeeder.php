@@ -6,6 +6,7 @@ use App\Models\Ekstrakurikuler;
 use App\Models\NilaiEkstrakurikuler;
 use App\Models\Siswa;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class NilaiEkstrakurikulerSeeder extends Seeder
 {
@@ -13,9 +14,16 @@ class NilaiEkstrakurikulerSeeder extends Seeder
     {
         $siswa = Siswa::all();
         $ekstrakurikuler = Ekstrakurikuler::all();
+        $semesters = DB::table('semester')->orderBy('id')->get();
 
         if ($siswa->isEmpty() || $ekstrakurikuler->isEmpty()) {
             $this->command?->warn('Siswa atau Ekstrakurikuler belum ada. Jalankan seeder terkait terlebih dahulu.');
+
+            return;
+        }
+
+        if ($semesters->isEmpty()) {
+            $this->command?->warn('Tabel semester masih kosong, nilai ekstrakurikuler tidak dibuat. Isi data semester terlebih dahulu.');
 
             return;
         }
@@ -33,7 +41,6 @@ class NilaiEkstrakurikulerSeeder extends Seeder
         ];
         $nilaiList = array_keys($nilaiToPredikat);
 
-        $semesterList = ['Ganjil', 'Genap'];
         $rows = [];
 
         foreach ($siswa as $s) {
@@ -47,13 +54,14 @@ class NilaiEkstrakurikulerSeeder extends Seeder
             }
 
             foreach ($ekskulSiswa as $ekskul) {
-                foreach ($semesterList as $semester) {
+                foreach ($semesters as $semester) {
                     $nilai = $nilaiList[array_rand($nilaiList)];
 
                     $rows[] = [
                         'siswa_id' => $s->id,
                         'ekstrakurikuler_id' => $ekskul->id,
-                        'semester' => $semester,
+                        'semester' => $semester->jenis, // kolom lama (wajib diisi), Ganjil/Genap
+                        'semester_id' => $semester->id,
                         'nilai' => $nilai,
                         'predikat' => $nilaiToPredikat[$nilai],
                         'keterangan' => null,
