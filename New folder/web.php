@@ -59,8 +59,6 @@ Route::middleware(['auth'])->group(function () {
         // Cetak rapor: pilih siswa -> pilih semester -> preview -> cetak / PDF (discope di controller).
         Route::get('/cetak-rapor', [CetakRaporController::class, 'index'])->name('cetak-rapor.index');
         Route::get('/cetak-rapor/cetak', [CetakRaporController::class, 'cetak'])->name('cetak-rapor.print');
-        // Edit isi rapor (capaian, keterangan, catatan wali kelas, ketidakhadiran): dibatasi admin & guru di controller.
-        Route::put('/cetak-rapor', [CetakRaporController::class, 'update'])->name('cetak-rapor.update');
     });
 
     // Admin + guru: input nilai. index & show dikecualikan karena sudah didaftarkan

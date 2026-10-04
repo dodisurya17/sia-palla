@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RaporCatatan;
 use App\Models\Siswa;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -87,7 +86,6 @@ class CetakRaporController extends Controller
             'selectedSiswa'    => $request->filled('siswa_id') ? (string) $request->siswa_id : '',
             'selectedSemester' => $request->filled('semester_id') ? (string) $request->semester_id : '',
             'rapor'            => $rapor,
-            'canEdit'          => $this->bisaEdit(),
         ]);
     }
 
@@ -114,83 +112,6 @@ class CetakRaporController extends Controller
     }
 
     /**
-     * Simpan hasil edit rapor: capaian kompetensi, keterangan ekstrakurikuler,
-     * catatan wali kelas, dan ketidakhadiran. Hanya admin & guru.
-     * Isian kosong / sama dengan teks otomatis = kembali memakai teks otomatis.
-     */
-    public function update(Request $request)
-    {
-        abort_unless($this->bisaEdit(), 403);
-
-        $data = $request->validate([
-            'siswa_id'                 => ['required', 'integer'],
-            'semester_id'              => ['required', 'integer'],
-            'catatan_wali_kelas'       => ['nullable', 'string', 'max:1000'],
-            'sakit'                    => ['nullable', 'integer', 'min:0', 'max:366'],
-            'izin'                     => ['nullable', 'integer', 'min:0', 'max:366'],
-            'alpa'                     => ['nullable', 'integer', 'min:0', 'max:366'],
-            'capaian'                  => ['nullable', 'array'],
-            'capaian.*.paham'          => ['nullable', 'string', 'max:500'],
-            'capaian.*.bimbingan'      => ['nullable', 'string', 'max:500'],
-            'keterangan_ekskul'        => ['nullable', 'array'],
-            'keterangan_ekskul.*'      => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $rapor = $this->buildRapor((int) $data['siswa_id'], (int) $data['semester_id']);
-        abort_if($rapor['kosong'], 404);
-
-        // Capaian: simpan hanya yang berbeda dari teks otomatis.
-        $capaian = [];
-        foreach ($rapor['nilai'] as $row) {
-            $in        = $request->input("capaian.{$row['mapel_id']}", []);
-            $paham     = trim((string) ($in['paham'] ?? ''));
-            $bimbingan = trim((string) ($in['bimbingan'] ?? ''));
-
-            $item = array_filter([
-                'paham'     => ($paham !== '' && $paham !== $row['paham_auto']) ? $paham : null,
-                'bimbingan' => ($bimbingan !== '' && $bimbingan !== $row['bimbingan_auto']) ? $bimbingan : null,
-            ]);
-
-            if ($item) {
-                $capaian[$row['mapel_id']] = $item;
-            }
-        }
-
-        // Keterangan ekskul: sama seperti di atas.
-        $ketEkskul = [];
-        foreach ($rapor['ekskul'] as $e) {
-            $val = trim((string) $request->input("keterangan_ekskul.{$e['ekstrakurikuler_id']}", ''));
-            if ($val !== '' && $val !== $e['keterangan_auto']) {
-                $ketEkskul[$e['ekstrakurikuler_id']] = $val;
-            }
-        }
-
-        $catatanWali = trim((string) ($data['catatan_wali_kelas'] ?? ''));
-
-        RaporCatatan::updateOrCreate(
-            ['siswa_id' => $data['siswa_id'], 'semester_id' => $data['semester_id']],
-            [
-                'catatan_wali_kelas' => $catatanWali !== '' ? $catatanWali : null,
-                'sakit'              => $data['sakit'] ?? null,
-                'izin'               => $data['izin'] ?? null,
-                'alpa'               => $data['alpa'] ?? null,
-                'capaian'            => $capaian ?: null,
-                'keterangan_ekskul'  => $ketEkskul ?: null,
-            ]
-        );
-
-        return redirect()
-            ->route('cetak-rapor.index', ['siswa_id' => $data['siswa_id'], 'semester_id' => $data['semester_id']])
-            ->with('success', 'Rapor berhasil diperbarui.');
-    }
-
-    /** Hanya admin & guru yang boleh mengedit isi rapor. */
-    private function bisaEdit(): bool
-    {
-        return in_array(auth()->user()->role, ['admin', 'guru'], true);
-    }
-
-    /**
      * Admin & guru: semua siswa. Orang tua: hanya anaknya sendiri.
      */
     private function siswaQuery()
@@ -214,11 +135,6 @@ class CetakRaporController extends Controller
 
         $urutan = array_flip(self::URUTAN_MAPEL);
 
-        // Isian manual (capaian, keterangan ekskul, catatan, ketidakhadiran) bila sudah pernah diedit.
-        $catatan         = RaporCatatan::where('siswa_id', $siswa->id)->where('semester_id', $semester->id)->first();
-        $capaianCustom   = $catatan?->capaian ?? [];
-        $ketEkskulCustom = $catatan?->keterangan_ekskul ?? [];
-
         // Bila ada duplikat nilai untuk mapel yang sama, ambil yang terakhir diinput.
         $nilai = DB::table('nilai_akademik as n')
             ->join('mata_pelajaran as m', 'm.id', '=', 'n.mata_pelajaran_id')
@@ -240,16 +156,11 @@ class CetakRaporController extends Controller
 
         $namaSiswa = Str::title(Str::lower($siswa->nama));
 
-        $rows = $nilai->map(function ($n, $i) use ($namaSiswa, $capaianCustom) {
-            [$pahamAuto, $bimbinganAuto] = $this->capaian($namaSiswa, $n);
-
-            $custom    = $capaianCustom[$n->mata_pelajaran_id] ?? [];
-            $paham     = filled($custom['paham'] ?? null) ? $custom['paham'] : $pahamAuto;
-            $bimbingan = filled($custom['bimbingan'] ?? null) ? $custom['bimbingan'] : $bimbinganAuto;
+        $rows = $nilai->map(function ($n, $i) use ($namaSiswa) {
+            [$paham, $bimbingan] = $this->capaian($namaSiswa, $n);
 
             return [
                 'no'         => $i + 1,
-                'mapel_id'   => $n->mata_pelajaran_id,
                 'kode'       => $n->kode_mapel,
                 'nama'       => $n->nama_mapel,
                 'kkm'        => (int) $n->kkm,
@@ -260,8 +171,6 @@ class CetakRaporController extends Controller
                 'tuntas'     => (float) $n->nilai_akhir >= (int) $n->kkm,
                 'paham'      => $paham,
                 'bimbingan'  => $bimbingan,
-                'paham_auto'     => $pahamAuto,
-                'bimbingan_auto' => $bimbinganAuto,
             ];
         })->all();
 
@@ -279,17 +188,7 @@ class CetakRaporController extends Controller
             ->keyBy('ekstrakurikuler_id')
             ->sortBy('nama', SORT_NATURAL | SORT_FLAG_CASE)
             ->values()
-            ->map(function ($e) use ($ketEkskulCustom) {
-                $e = (array) $e;
-
-                $auto   = $e['keterangan'] ?: ($e['predikat'] ? 'Predikat ' . $e['predikat'] : '-');
-                $custom = $ketEkskulCustom[$e['ekstrakurikuler_id']] ?? null;
-
-                $e['keterangan_auto']   = $auto;
-                $e['keterangan_tampil'] = filled($custom) ? $custom : $auto;
-
-                return $e;
-            })
+            ->map(fn ($e) => (array) $e)
             ->all();
 
         $orangTua = $siswa->orang_tua_id
@@ -344,12 +243,6 @@ class CetakRaporController extends Controller
                 'belum_tuntas' => count($rows) - $tuntas,
             ],
             'ekskul'        => $ekskul,
-            'catatan'       => [
-                'wali_kelas' => $catatan?->catatan_wali_kelas,
-                'sakit'      => $catatan?->sakit,
-                'izin'       => $catatan?->izin,
-                'alpa'       => $catatan?->alpa,
-            ],
             'tanggal_cetak' => Carbon::now()->locale('id')->translatedFormat('d F Y'),
         ];
     }

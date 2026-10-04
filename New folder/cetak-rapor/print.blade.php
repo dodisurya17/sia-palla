@@ -25,15 +25,14 @@
         .toolbar strong { color: #0f172a; }
         .toolbar .actions { display: flex; gap: 8px; }
         .btn {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 8px 16px; border-radius: 9999px; border: 1px solid #e2e8f0;
-            font: 500 14px/20px 'Figtree', ui-sans-serif, system-ui, sans-serif;
-            color: #475569; background: #fff; text-decoration: none; cursor: pointer;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, .05); transition: background .15s, border-color .15s;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 9px 16px; border-radius: 12px; border: 1px solid #e2e8f0;
+            font: 600 13px/1 'Figtree', ui-sans-serif, system-ui, sans-serif;
+            color: #475569; background: #fff; text-decoration: none; cursor: pointer; transition: background .15s;
         }
         .btn:hover { background: #f8fafc; }
-        .btn.primary { background: #eff6ff; border-color: #dbeafe; color: #1d4ed8; }
-        .btn.primary:hover { background: #dbeafe; border-color: #bfdbfe; }
+        .btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+        .btn.primary:hover { background: #1d4ed8; }
 
         .page { padding: clamp(12px, 3vw, 28px); }
         .page .rapor { box-shadow: 0 10px 30px rgba(15, 23, 42, .08); border-radius: 4px; }

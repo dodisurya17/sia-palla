@@ -11,7 +11,6 @@
     $dots = '……';
     $tahunPelajaran = str_replace('/', ' / ', $sem['tahun_ajaran']);
     $noEkskul = count($rapor['ekskul']);
-    $hadir = fn ($v) => is_null($v) ? $dots : $v;
 @endphp
 
 <style>
@@ -60,7 +59,7 @@
 
     /* Ekstrakurikuler & catatan */
     .rp-table.ekskul td.nama { font-weight: 800; text-transform: uppercase; }
-    .rp-table.ekskul td.catatan { height: 54px; vertical-align: top; font-weight: 700; white-space: normal; word-break: break-word; }
+    .rp-table.ekskul td.catatan { height: 54px; vertical-align: top; font-weight: 700; }
 
     /* Ketidakhadiran & keputusan */
     .rp-bottom { display: grid; grid-template-columns: 200px 1fr; gap: 24px; margin-top: 18px; align-items: start; break-inside: avoid; page-break-inside: avoid; }
@@ -160,13 +159,13 @@
                     <tr>
                         <td class="c">{{ $i + 1 }}</td>
                         <td class="nama">{{ $e['nama'] }}</td>
-                        <td>{{ $e['keterangan_tampil'] }}</td>
+                        <td>{{ $e['keterangan'] ?: ($e['predikat'] ? 'Predikat ' . $e['predikat'] : '-') }}</td>
                     </tr>
                 @endforeach
                 <tr>
                     <td class="c">{{ $noEkskul + 1 }}</td>
                     <td class="nama">Catatan Wali Kelas</td>
-                    <td class="catatan">{!! nl2br(e($rapor['catatan']['wali_kelas'] ?? '')) !!}</td>
+                    <td class="catatan"></td>
                 </tr>
             </tbody>
         </table>
@@ -179,9 +178,9 @@
                 <tr><th colspan="3">Ketidakhadiran</th></tr>
             </thead>
             <tbody>
-                <tr><td>Sakit</td><td class="num">{{ $hadir($rapor['catatan']['sakit'] ?? null) }}</td><td class="unit">hari</td></tr>
-                <tr><td>Izin</td><td class="num">{{ $hadir($rapor['catatan']['izin'] ?? null) }}</td><td class="unit">hari</td></tr>
-                <tr><td>Tanpa Keterangan</td><td class="num">{{ $hadir($rapor['catatan']['alpa'] ?? null) }}</td><td class="unit">hari</td></tr>
+                <tr><td>Sakit</td><td class="num">{{ $dots }}</td><td class="unit">hari</td></tr>
+                <tr><td>Izin</td><td class="num">{{ $dots }}</td><td class="unit">hari</td></tr>
+                <tr><td>Tanpa Keterangan</td><td class="num">{{ $dots }}</td><td class="unit">hari</td></tr>
             </tbody>
         </table>
 
