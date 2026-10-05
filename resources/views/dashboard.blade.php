@@ -24,7 +24,7 @@
         <div class="relative text-center">
             <p class="text-xs font-semibold uppercase tracking-widest text-blue-100">Selamat Datang</p>
             <h2 class="mt-2 text-2xl font-bold leading-snug">Sistem Informasi Akademik</h2>
-            <h3 class="mt-1 text-lg font-bold uppercase tracking-wide text-blue-100">SMA Katolik Palla</h3>
+            <h3 class="mt-1 text-lg font-bold uppercase tracking-wide text-blue-100">SMP Katolik Palla</h3>
         </div>
     </div>
 
